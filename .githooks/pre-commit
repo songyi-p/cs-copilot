@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+# Block commits that contain detected credentials before they leave this machine.
+set -eu
+
+if ! command -v trufflehog >/dev/null 2>&1; then
+  echo "TruffleHog is required to commit. Install it with: brew install trufflehog" >&2
+  exit 1
+fi
+
+trufflehog git file://. \
+  --since-commit HEAD \
+  --results=verified,unknown \
+  --fail \
+  --no-update \
+  --trust-local-git-config
