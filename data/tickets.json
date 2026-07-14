@@ -1,0 +1,101 @@
+[
+  {
+    "ticketId": "TKT-1001",
+    "customerId": "CUS-005",
+    "orderId": "ORD-202607-1005",
+    "inquiry": "배송 예정일이 지났는데 조회가 멈춰 있어요. 언제 받을 수 있나요?",
+    "category": "DELIVERY_DELAY",
+    "status": "OPEN",
+    "createdAt": "2026-07-13T09:10:00+09:00"
+  },
+  {
+    "ticketId": "TKT-1002",
+    "customerId": "CUS-003",
+    "orderId": "ORD-202607-1003",
+    "inquiry": "받은 바지 사이즈가 작아서 교환하고 싶어요.",
+    "category": "EXCHANGE",
+    "status": "IN_REVIEW",
+    "createdAt": "2026-07-12T14:20:00+09:00"
+  },
+  {
+    "ticketId": "TKT-1003",
+    "customerId": "CUS-008",
+    "orderId": "ORD-202607-1009",
+    "inquiry": "상품 색상이 화면에서 본 것과 달라 반품 가능한가요?",
+    "category": "RETURN",
+    "status": "OPEN",
+    "createdAt": "2026-07-13T10:25:00+09:00"
+  },
+  {
+    "ticketId": "TKT-1004",
+    "customerId": "CUS-010",
+    "orderId": "ORD-202607-1011",
+    "inquiry": "오늘이 배송 예정일인데 아직 배송 중입니다. 주소를 바꿀 수 있나요?",
+    "category": "DELIVERY_ADDRESS",
+    "status": "ESCALATED",
+    "createdAt": "2026-07-13T11:10:00+09:00"
+  },
+  {
+    "ticketId": "TKT-1005",
+    "customerId": "CUS-002",
+    "orderId": "ORD-202607-1002",
+    "inquiry": "주문한 셔츠의 색상을 변경하고 싶습니다.",
+    "category": "ORDER_CHANGE",
+    "status": "OPEN",
+    "createdAt": "2026-07-13T11:45:00+09:00"
+  },
+  {
+    "ticketId": "TKT-1006",
+    "customerId": "CUS-007",
+    "orderId": "ORD-202607-1007",
+    "inquiry": "환불이 언제 결제 수단으로 들어오나요?",
+    "category": "REFUND_STATUS",
+    "status": "RESOLVED",
+    "createdAt": "2026-07-11T16:00:00+09:00"
+  },
+  {
+    "ticketId": "TKT-1007",
+    "customerId": "CUS-004",
+    "orderId": "ORD-202607-1017",
+    "inquiry": "반품 배송비가 왜 차감됐는지 알려주세요.",
+    "category": "RETURN_FEE",
+    "status": "RESOLVED",
+    "createdAt": "2026-07-10T13:30:00+09:00"
+  },
+  {
+    "ticketId": "TKT-1008",
+    "customerId": "CUS-001",
+    "orderId": "ORD-202607-1008",
+    "inquiry": "지난주에 주문했는데 아직 상품을 못 받았어요. 환불 가능한가요?",
+    "category": "DELIVERY_DELAY",
+    "status": "OPEN",
+    "createdAt": "2026-07-13T13:00:00+09:00"
+  },
+  {
+    "ticketId": "TKT-1009",
+    "customerId": "CUS-006",
+    "orderId": "ORD-202607-1014",
+    "inquiry": "받은 머플러에 올이 풀린 부분이 있습니다.",
+    "category": "DEFECT",
+    "status": "OPEN",
+    "createdAt": "2026-07-13T13:40:00+09:00"
+  },
+  {
+    "ticketId": "TKT-1010",
+    "customerId": "CUS-009",
+    "orderId": "ORD-202607-1013",
+    "inquiry": "결제는 완료됐는데 주문 취소가 가능한가요?",
+    "category": "CANCELLATION",
+    "status": "OPEN",
+    "createdAt": "2026-07-13T14:15:00+09:00"
+  },
+  {
+    "ticketId": "TKT-1011",
+    "customerId": "CUS-010",
+    "orderId": null,
+    "inquiry": "실버 등급 고객 혜택을 알려주세요.",
+    "category": "ACCOUNT",
+    "status": "OPEN",
+    "createdAt": "2026-07-13T14:40:00+09:00"
+  }
+]

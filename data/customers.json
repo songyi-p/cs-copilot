@@ -1,0 +1,72 @@
+[
+  {
+    "customerId": "CUS-001",
+    "name": "김민지",
+    "grade": "GOLD",
+    "recentOrderCount": 4,
+    "recentCsCount": 1
+  },
+  {
+    "customerId": "CUS-002",
+    "name": "이준호",
+    "grade": "SILVER",
+    "recentOrderCount": 2,
+    "recentCsCount": 0
+  },
+  {
+    "customerId": "CUS-003",
+    "name": "박서연",
+    "grade": "VIP",
+    "recentOrderCount": 9,
+    "recentCsCount": 2
+  },
+  {
+    "customerId": "CUS-004",
+    "name": "최도윤",
+    "grade": "BRONZE",
+    "recentOrderCount": 1,
+    "recentCsCount": 0
+  },
+  {
+    "customerId": "CUS-005",
+    "name": "정하늘",
+    "grade": "GOLD",
+    "recentOrderCount": 5,
+    "recentCsCount": 1
+  },
+  {
+    "customerId": "CUS-006",
+    "name": "윤지후",
+    "grade": "SILVER",
+    "recentOrderCount": 3,
+    "recentCsCount": 0
+  },
+  {
+    "customerId": "CUS-007",
+    "name": "한유진",
+    "grade": "VIP",
+    "recentOrderCount": 12,
+    "recentCsCount": 3
+  },
+  {
+    "customerId": "CUS-008",
+    "name": "오세진",
+    "grade": "BRONZE",
+    "recentOrderCount": 1,
+    "recentCsCount": 1
+  },
+  {
+    "customerId": "CUS-009",
+    "name": "서지민",
+    "grade": "GOLD",
+    "recentOrderCount": 6,
+    "recentCsCount": 0
+  },
+  {
+    "customerId": "CUS-010",
+    "name": "강민석",
+    "grade": "SILVER",
+    "recentOrderCount": 2,
+    "recentCsCount": 1
+  }
+]

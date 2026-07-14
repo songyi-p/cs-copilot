@@ -1,0 +1,29 @@
+[
+  {
+    "historyId": "HIS-001",
+    "ticketId": "TKT-1006",
+    "suggestedAction": "ESCALATE",
+    "finalAction": "REFUND_STATUS_NOTICE",
+    "aiDecision": "EDITED",
+    "agentId": "agent-park",
+    "createdAt": "2026-07-11T16:05:00+09:00"
+  },
+  {
+    "historyId": "HIS-002",
+    "ticketId": "TKT-1007",
+    "suggestedAction": "ESCALATE",
+    "finalAction": "RETURN_FEE_NOTICE",
+    "aiDecision": "ADOPTED",
+    "agentId": "agent-kim",
+    "createdAt": "2026-07-10T13:42:00+09:00"
+  },
+  {
+    "historyId": "HIS-003",
+    "ticketId": "TKT-1004",
+    "suggestedAction": "ESCALATE",
+    "finalAction": "ESCALATE",
+    "aiDecision": "ADOPTED",
+    "agentId": "agent-lee",
+    "createdAt": "2026-07-13T11:16:00+09:00"
+  }
+]

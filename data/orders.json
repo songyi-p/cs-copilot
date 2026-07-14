@@ -1,0 +1,202 @@
+[
+  {
+    "orderId": "ORD-202607-1001",
+    "customerId": "CUS-001",
+    "productName": "에어핏 반팔 티셔츠",
+    "orderStatus": "DELIVERED",
+    "orderedAt": "2026-07-02",
+    "deliveryExpectedAt": "2026-07-05",
+    "deliveredAt": "2026-07-04",
+    "paymentAmount": 29000
+  },
+  {
+    "orderId": "ORD-202607-1002",
+    "customerId": "CUS-002",
+    "productName": "데일리 린넨 셔츠",
+    "orderStatus": "PREPARING",
+    "orderedAt": "2026-07-10",
+    "deliveryExpectedAt": "2026-07-15",
+    "deliveredAt": null,
+    "paymentAmount": 49000
+  },
+  {
+    "orderId": "ORD-202607-1003",
+    "customerId": "CUS-003",
+    "productName": "클래식 데님 팬츠",
+    "orderStatus": "DELIVERED",
+    "orderedAt": "2026-07-01",
+    "deliveryExpectedAt": "2026-07-04",
+    "deliveredAt": "2026-07-03",
+    "paymentAmount": 69000
+  },
+  {
+    "orderId": "ORD-202607-1004",
+    "customerId": "CUS-004",
+    "productName": "코튼 버킷햇",
+    "orderStatus": "CANCELLED",
+    "orderedAt": "2026-07-09",
+    "deliveryExpectedAt": null,
+    "deliveredAt": null,
+    "paymentAmount": 32000
+  },
+  {
+    "orderId": "ORD-202607-1005",
+    "customerId": "CUS-005",
+    "productName": "라이트 윈드브레이커",
+    "orderStatus": "IN_TRANSIT",
+    "orderedAt": "2026-07-08",
+    "deliveryExpectedAt": "2026-07-12",
+    "deliveredAt": null,
+    "paymentAmount": 89000
+  },
+  {
+    "orderId": "ORD-202607-1006",
+    "customerId": "CUS-006",
+    "productName": "슬림 카드지갑",
+    "orderStatus": "DELIVERED",
+    "orderedAt": "2026-07-05",
+    "deliveryExpectedAt": "2026-07-08",
+    "deliveredAt": "2026-07-08",
+    "paymentAmount": 35000
+  },
+  {
+    "orderId": "ORD-202607-1007",
+    "customerId": "CUS-007",
+    "productName": "오버핏 후디",
+    "orderStatus": "REFUNDED",
+    "orderedAt": "2026-06-28",
+    "deliveryExpectedAt": "2026-07-02",
+    "deliveredAt": "2026-07-01",
+    "paymentAmount": 59000
+  },
+  {
+    "orderId": "ORD-202607-1008",
+    "customerId": "CUS-001",
+    "productName": "프리미엄 러닝화",
+    "orderStatus": "IN_TRANSIT",
+    "orderedAt": "2026-07-06",
+    "deliveryExpectedAt": "2026-07-10",
+    "deliveredAt": null,
+    "paymentAmount": 129000
+  },
+  {
+    "orderId": "ORD-202607-1009",
+    "customerId": "CUS-008",
+    "productName": "니트 가디건",
+    "orderStatus": "DELIVERED",
+    "orderedAt": "2026-07-03",
+    "deliveryExpectedAt": "2026-07-07",
+    "deliveredAt": "2026-07-06",
+    "paymentAmount": 79000
+  },
+  {
+    "orderId": "ORD-202607-1010",
+    "customerId": "CUS-009",
+    "productName": "베이직 양말 5팩",
+    "orderStatus": "PREPARING",
+    "orderedAt": "2026-07-12",
+    "deliveryExpectedAt": "2026-07-17",
+    "deliveredAt": null,
+    "paymentAmount": 15000
+  },
+  {
+    "orderId": "ORD-202607-1011",
+    "customerId": "CUS-010",
+    "productName": "캔버스 토트백",
+    "orderStatus": "IN_TRANSIT",
+    "orderedAt": "2026-07-09",
+    "deliveryExpectedAt": "2026-07-13",
+    "deliveredAt": null,
+    "paymentAmount": 45000
+  },
+  {
+    "orderId": "ORD-202607-1012",
+    "customerId": "CUS-003",
+    "productName": "실크 스카프",
+    "orderStatus": "DELIVERED",
+    "orderedAt": "2026-07-04",
+    "deliveryExpectedAt": "2026-07-08",
+    "deliveredAt": "2026-07-07",
+    "paymentAmount": 39000
+  },
+  {
+    "orderId": "ORD-202607-1013",
+    "customerId": "CUS-005",
+    "productName": "와이드 슬랙스",
+    "orderStatus": "PAID",
+    "orderedAt": "2026-07-13",
+    "deliveryExpectedAt": "2026-07-18",
+    "deliveredAt": null,
+    "paymentAmount": 65000
+  },
+  {
+    "orderId": "ORD-202607-1014",
+    "customerId": "CUS-006",
+    "productName": "울 블렌드 머플러",
+    "orderStatus": "DELIVERED",
+    "orderedAt": "2026-06-30",
+    "deliveryExpectedAt": "2026-07-04",
+    "deliveredAt": "2026-07-05",
+    "paymentAmount": 55000
+  },
+  {
+    "orderId": "ORD-202607-1015",
+    "customerId": "CUS-007",
+    "productName": "스트라이프 셔츠",
+    "orderStatus": "IN_TRANSIT",
+    "orderedAt": "2026-07-10",
+    "deliveryExpectedAt": "2026-07-14",
+    "deliveredAt": null,
+    "paymentAmount": 52000
+  },
+  {
+    "orderId": "ORD-202607-1016",
+    "customerId": "CUS-002",
+    "productName": "스포츠 크루삭스",
+    "orderStatus": "DELIVERED",
+    "orderedAt": "2026-07-02",
+    "deliveryExpectedAt": "2026-07-06",
+    "deliveredAt": "2026-07-05",
+    "paymentAmount": 18000
+  },
+  {
+    "orderId": "ORD-202607-1017",
+    "customerId": "CUS-004",
+    "productName": "미니 크로스백",
+    "orderStatus": "REFUNDED",
+    "orderedAt": "2026-06-29",
+    "deliveryExpectedAt": "2026-07-03",
+    "deliveredAt": "2026-07-02",
+    "paymentAmount": 48000
+  },
+  {
+    "orderId": "ORD-202607-1018",
+    "customerId": "CUS-008",
+    "productName": "드라이 조거 팬츠",
+    "orderStatus": "PREPARING",
+    "orderedAt": "2026-07-11",
+    "deliveryExpectedAt": "2026-07-16",
+    "deliveredAt": null,
+    "paymentAmount": 42000
+  },
+  {
+    "orderId": "ORD-202607-1019",
+    "customerId": "CUS-009",
+    "productName": "레더 벨트",
+    "orderStatus": "DELIVERED",
+    "orderedAt": "2026-07-06",
+    "deliveryExpectedAt": "2026-07-09",
+    "deliveredAt": "2026-07-09",
+    "paymentAmount": 37000
+  },
+  {
+    "orderId": "ORD-202607-1020",
+    "customerId": "CUS-010",
+    "productName": "폴로 셔츠",
+    "orderStatus": "PAID",
+    "orderedAt": "2026-07-13",
+    "deliveryExpectedAt": "2026-07-18",
+    "deliveredAt": null,
+    "paymentAmount": 62000
+  }
+]
