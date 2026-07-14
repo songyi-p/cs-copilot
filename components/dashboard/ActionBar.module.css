@@ -1,0 +1,8 @@
+@media (max-width: 720px) {
+  .bar {
+    position: static;
+    height: auto;
+    min-height: 72px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
