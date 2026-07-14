@@ -1,0 +1,72 @@
+[
+  {
+    "referenceId": "REF-001",
+    "ticketId": "TKT-1001",
+    "policyId": "POL-DELIVERY-001",
+    "section": "배송 지연",
+    "reason": "예정일이 지난 배송 중 주문의 안내 및 쿠폰 조건"
+  },
+  {
+    "referenceId": "REF-002",
+    "ticketId": "TKT-1002",
+    "policyId": "POL-RETURN-001",
+    "section": "교환",
+    "reason": "사이즈 교환의 재고 확인 조건"
+  },
+  {
+    "referenceId": "REF-003",
+    "ticketId": "TKT-1003",
+    "policyId": "POL-RETURN-001",
+    "section": "신청 가능 기간",
+    "reason": "수령 후 반품 가능 기간 확인"
+  },
+  {
+    "referenceId": "REF-004",
+    "ticketId": "TKT-1004",
+    "policyId": "POL-DELIVERY-001",
+    "section": "배송지 변경",
+    "reason": "배송 중 주문의 주소 변경 제한"
+  },
+  {
+    "referenceId": "REF-005",
+    "ticketId": "TKT-1006",
+    "policyId": "POL-REFUND-001",
+    "section": "환불 처리 기간",
+    "reason": "환불 완료 후 결제수단별 소요 기간"
+  },
+  {
+    "referenceId": "REF-006",
+    "ticketId": "TKT-1007",
+    "policyId": "POL-RETURN-001",
+    "section": "반품 배송비",
+    "reason": "단순 변심 반품의 배송비 차감 기준"
+  },
+  {
+    "referenceId": "REF-007",
+    "ticketId": "TKT-1008",
+    "policyId": "POL-DELIVERY-001",
+    "section": "배송 지연",
+    "reason": "배송 지연 쿠폰 및 이관 조건"
+  },
+  {
+    "referenceId": "REF-008",
+    "ticketId": "TKT-1008",
+    "policyId": "POL-REFUND-001",
+    "section": "배송 지연 환불",
+    "reason": "배송 중 주문의 환불 검토 조건"
+  },
+  {
+    "referenceId": "REF-009",
+    "ticketId": "TKT-1009",
+    "policyId": "POL-DEFECT-001",
+    "section": "처리",
+    "reason": "불량 상품의 증빙 확인 및 교환·환불 기준"
+  },
+  {
+    "referenceId": "REF-010",
+    "ticketId": "TKT-1010",
+    "policyId": "POL-REFUND-001",
+    "section": "배송 전 취소",
+    "reason": "출고 전 주문의 취소 요청 기준"
+  }
+]
