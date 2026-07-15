@@ -1,4 +1,4 @@
-import { Order, Ticket } from "../components/dashboard/types";
+import type { Order, Ticket } from "@/components/dashboard/types";
 
 export const createDraft = (ticket: Ticket, name: string, order?: Order) => {
   if (ticket.category === "DELIVERY_DELAY")
