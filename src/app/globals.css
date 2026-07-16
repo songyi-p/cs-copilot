@@ -1,0 +1,41 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Manrope", Arial, sans-serif;
+  --font-mono: "DM Mono", monospace;
+  --color-ink: #17202d;
+  --color-muted: #718096;
+  --color-line: #e8ecf2;
+  --color-canvas: #f4f6f9;
+  --color-navy: #202c45;
+  --color-brand: #4868e8;
+  --color-ai: #af9cf8;
+  --color-eyebrow: #94a0b4;
+  --color-label: #69778a;
+  --color-term: #8793a3;
+  --color-faint: #9aa5b4;
+  --color-timestamp: #9ba5b4;
+  --color-info-accent: #677bd6;
+  --color-action-primary: #556ee0;
+  --color-status-open: #526ad0;
+  --color-status-open-bg: #e8edff;
+  --color-status-review: #a16b13;
+  --color-status-review-bg: #fff3dc;
+  --color-status-escalated: #b15370;
+  --color-status-escalated-bg: #fbe8ee;
+  --color-status-resolved: #308766;
+  --color-status-resolved-bg: #e3f6ee;
+  --breakpoint-mobile: 45rem;
+  --breakpoint-dashboard: 68.75rem;
+}
+
+@layer base {
+  body {
+    @apply m-0 bg-canvas font-sans text-[13px] text-ink;
+  }
+
+  button {
+    @apply cursor-pointer;
+  }
+}

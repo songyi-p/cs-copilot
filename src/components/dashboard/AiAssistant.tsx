@@ -1,0 +1,79 @@
+import type { Order, PolicyReference, Ticket } from "@/components/dashboard/types";
+import { createDraft } from "@/utils/lib";
+
+const sectionLabelClass = "mb-2.75 text-[11px] font-extrabold text-label";
+
+export function AiAssistant({
+  ticket,
+  customerName,
+  order,
+  references,
+  draft,
+  onDraftChange,
+}: {
+  ticket: Ticket;
+  customerName: string;
+  order?: Order;
+  references: PolicyReference[];
+  draft: string;
+  onDraftChange: (draft: string) => void;
+}) {
+  const response = draft || createDraft(ticket, customerName, order);
+  return (
+    <aside className="min-h-0 overflow-y-auto border-l border-line bg-white px-6.5 py-7.25 scrollbar-gutter-stable max-dashboard:col-span-full max-dashboard:border-t max-dashboard:border-l-0 max-mobile:px-4 max-mobile:py-5.5">
+      <div className="mb-7 flex items-start justify-between">
+        <div className="relative pl-6.25">
+          <span className="absolute top-0.75 left-0 text-[17px] text-ai">✦</span>
+          <p className="mb-1 font-mono text-[10px] font-medium tracking-[1.3px] text-eyebrow">
+            AI COPILOT
+          </p>
+          <h2 className="m-0 text-[19px] font-bold tracking-[-0.5px]">처리 제안</h2>
+        </div>
+        <span className="rounded-[3px] bg-[#e8f7f0] px-1.75 py-1 text-[10px] font-bold text-[#3c8a6a]">
+          신뢰도 높음
+        </span>
+      </div>
+      <section className="mb-5 border-b border-line pb-5 max-dashboard:max-w-162.5">
+        <div className={sectionLabelClass}>
+          AI 답변 초안 <span className="ml-1.5 font-semibold text-[#7790de]">자동 생성</span>
+        </div>
+        <textarea
+          className="min-h-33.75 w-full resize-y rounded-md border border-[#dce2ea] bg-[#fbfcff] p-3.25 text-xs leading-[1.7] text-[#344052] outline-[#7389e8] select-text"
+          value={response}
+          onChange={(event) => onDraftChange(event.target.value)}
+          aria-label="AI 답변 초안"
+        />
+      </section>
+      <section className="mb-5 border-b border-line pb-5 max-dashboard:max-w-162.5">
+        <div className={sectionLabelClass}>정책 근거</div>
+        {references.length ? (
+          references.map((reference) => (
+            <div className="my-3.25 flex gap-2.5" key={reference.referenceId}>
+              <span className="grid size-6.25 shrink-0 place-items-center rounded bg-[#f0edff] text-[#7968da]">
+                ▤
+              </span>
+              <div>
+                <strong className="text-xs">{reference.section}</strong>
+                <p className="my-0.75 text-[11px] leading-[1.45] text-muted">{reference.reason}</p>
+                <small className="font-mono text-[9px] text-faint">{reference.policyId}</small>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="m-0 text-xs text-faint">연결된 정책 근거가 없습니다.</p>
+        )}
+      </section>
+      <section className="rounded-[7px] border border-[#d9d5f5] bg-[#f7f5ff] p-3.75">
+        <div className="mb-2.75 text-[11px] font-extrabold text-[#7667bd]">권장 처리안</div>
+        <strong className="text-xs leading-[1.6]">
+          {ticket.category === "DELIVERY_DELAY"
+            ? "택배사 확인 후 지연 안내 및 쿠폰 발급 검토"
+            : "정책 기준 확인 후 고객에게 처리 안내"}
+        </strong>
+        <p className="mt-1.75 mb-0 text-[11px] text-[#778199]">
+          고객 등급과 주문 상태를 반영한 제안입니다.
+        </p>
+      </section>
+    </aside>
+  );
+}
