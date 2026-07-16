@@ -7,8 +7,18 @@ import { AiAssistant } from "@/components/dashboard/AiAssistant";
 import { AppHeader } from "@/components/dashboard/AppHeader";
 import { TicketDetail } from "@/components/dashboard/TicketDetail";
 import { TicketList } from "@/components/dashboard/TicketList";
-import type { ActionHistory, Agent, Customer, Order, Ticket } from "@/utils/types";
-import { createDraft, createRecommendedAction, searchPolicies } from "@/utils/lib";
+import type {
+  ActionHistory,
+  Agent,
+  Customer,
+  LlmSuggestion,
+  LlmSuggestionRequest,
+  Order,
+  Ticket,
+} from "@/utils/types";
+import { recommendedActionLabel } from "@/utils/constants";
+import { getAiSuggestion } from "@/utils/ai-suggestion-client";
+import { searchPolicies } from "@/utils/lib";
 import actionHistoryData from "@/data/action-history.json";
 import customersData from "@/data/customers.json";
 import ordersData from "@/data/orders.json";
@@ -31,6 +41,13 @@ const HISTORY_STORAGE_KEY = "cs-copilot-action-history";
 const TICKET_STORAGE_KEY = "cs-copilot-tickets";
 const DRAFT_STORAGE_KEY = "cs-copilot-drafts";
 
+type SuggestionState = {
+  ticketId: string;
+  status: "loading" | "success" | "error";
+  suggestion?: LlmSuggestion;
+  error: string;
+};
+
 export default function Home() {
   const [tickets, setTickets] = useState(initialTickets);
   const [histories, setHistories] = useState(initialHistories);
@@ -38,18 +55,81 @@ export default function Home() {
   const [draft, setDraft] = useState("");
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState("");
+  const [suggestionState, setSuggestionState] = useState<SuggestionState>({
+    ticketId: initialTickets[0].ticketId,
+    status: "loading",
+    error: "",
+  });
+  const [retryVersion, setRetryVersion] = useState(0);
   const selected = useMemo(
     () => tickets.find((ticket) => ticket.ticketId === selectedId)!,
-    [selectedId]
+    [selectedId, tickets]
   );
   const customer = customers.find((item) => item.customerId === selected.customerId)!;
   const order = orders.find((item) => item.orderId === selected.orderId);
-  const policyResults = searchPolicies(selected.inquiry);
+  const policyResults = useMemo(() => searchPolicies(selected.inquiry), [selected.inquiry]);
   const ticketHistories = histories
     .filter((item) => item.ticketId === selected.ticketId)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const assignee = agents.find((agent) => agent.agentId === selected.assigneeId)!;
   const canEdit = currentAgent.role === "ADMIN" || selected.assigneeId === currentAgent.agentId;
+  const activeSuggestion =
+    suggestionState.ticketId === selected.ticketId ? suggestionState.suggestion : undefined;
+  const activeSuggestionStatus =
+    suggestionState.ticketId === selected.ticketId ? suggestionState.status : "loading";
+  const activeSuggestionError =
+    suggestionState.ticketId === selected.ticketId ? suggestionState.error : "";
+
+  useEffect(() => {
+    let active = true;
+    const request: LlmSuggestionRequest = {
+      inquiry: selected.inquiry,
+      order: order
+        ? {
+            orderId: order.orderId,
+            productName: order.productName,
+            orderStatus: order.orderStatus,
+            orderedAt: order.orderedAt,
+            deliveryExpectedAt: order.deliveryExpectedAt,
+            deliveredAt: order.deliveredAt,
+            paymentAmount: order.paymentAmount,
+          }
+        : null,
+      policies: policyResults.map(({ policyId, section, content }) => ({
+        policyId,
+        section,
+        content,
+      })),
+    };
+
+    setSuggestionState({
+      ticketId: selected.ticketId,
+      status: "loading",
+      error: "",
+    });
+    getAiSuggestion(request, retryVersion)
+      .then((suggestion) => {
+        if (!active) return;
+        setSuggestionState({
+          ticketId: selected.ticketId,
+          status: "success",
+          suggestion,
+          error: "",
+        });
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        setSuggestionState({
+          ticketId: selected.ticketId,
+          status: "error",
+          error: error instanceof Error ? error.message : "AI 제안을 생성하지 못했습니다.",
+        });
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [order, policyResults, retryVersion, selected.inquiry, selected.ticketId]);
 
   useEffect(() => {
     const saved = window.localStorage.getItem(HISTORY_STORAGE_KEY);
@@ -67,8 +147,8 @@ export default function Home() {
               ticket.assigneeId && agents.some((agent) => agent.agentId === ticket.assigneeId)
                 ? ticket.assigneeId
                 : ticket.ticketId === "TKT-1004"
-                ? "agent-lee"
-                : currentAgent.agentId,
+                  ? "agent-lee"
+                  : currentAgent.agentId,
           }))
         );
       }
@@ -88,24 +168,27 @@ export default function Home() {
     setSelectedId(ticket.ticketId);
     setDraft(drafts[ticket.ticketId] ?? "");
     setNotice("");
+    setRetryVersion(0);
   };
 
   const approveTicket = () => {
-    if (!canEdit || selected.status === "RESOLVED") return;
+    if (!canEdit || selected.status === "RESOLVED" || !activeSuggestion) return;
 
-    const originalDraft = createDraft(selected, customer.name, order);
+    const originalDraft = activeSuggestion.replyDraft;
     const finalResponse = draft || originalDraft;
     const history: ActionHistory = {
       historyId: `HIS-${Date.now()}`,
       ticketId: selected.ticketId,
-      suggestedAction: createRecommendedAction(selected),
+      suggestedAction: activeSuggestion.recommendedAction,
       finalAction: "APPROVED_RESPONSE",
-      actionLabel: createRecommendedAction(selected),
+      actionLabel: recommendedActionLabel[activeSuggestion.recommendedAction],
       eventType: "RESPONSE_APPROVED",
       aiDecision: finalResponse === originalDraft ? "ADOPTED" : "EDITED",
       agentId: "데모 담당자",
       createdAt: new Date().toISOString(),
       finalResponse,
+      aiConfidence: activeSuggestion.confidence,
+      policyReferences: activeSuggestion.policyReferences,
     };
     const nextHistories = [history, ...histories];
 
@@ -125,18 +208,24 @@ export default function Home() {
 
   const saveDraft = () => {
     if (!canEdit || selected.status === "RESOLVED") return;
-    const finalDraft = draft || createDraft(selected, customer.name, order);
+    const finalDraft = draft || activeSuggestion?.replyDraft || "";
+    if (!finalDraft.trim()) {
+      setNotice("저장할 답변 초안을 입력해 주세요.");
+      return;
+    }
     const nextDrafts = { ...drafts, [selected.ticketId]: finalDraft };
     const history: ActionHistory = {
       historyId: `HIS-${Date.now()}`,
       ticketId: selected.ticketId,
-      suggestedAction: createRecommendedAction(selected),
+      suggestedAction: activeSuggestion?.recommendedAction ?? "MANUAL_REVIEW",
       finalAction: "DRAFT_SAVED",
       actionLabel: "답변 초안 저장",
       eventType: "DRAFT_SAVED",
       agentId: currentAgent.agentId,
       createdAt: new Date().toISOString(),
       finalResponse: finalDraft,
+      aiConfidence: activeSuggestion?.confidence,
+      policyReferences: activeSuggestion?.policyReferences,
     };
     const nextHistories = [history, ...histories];
     setDraft(finalDraft);
@@ -149,8 +238,10 @@ export default function Home() {
 
   const transferTicket = (agentId: string, note: string) => {
     if (!canEdit || selected.status === "RESOLVED") return;
-    const finalDraft = draft || createDraft(selected, customer.name, order);
-    const nextDrafts = { ...drafts, [selected.ticketId]: finalDraft };
+    const finalDraft = draft || activeSuggestion?.replyDraft || "";
+    const nextDrafts = finalDraft
+      ? { ...drafts, [selected.ticketId]: finalDraft }
+      : drafts;
     const nextTickets = tickets.map((ticket) =>
       ticket.ticketId === selected.ticketId
         ? { ...ticket, assigneeId: agentId, status: "ESCALATED" }
@@ -159,7 +250,7 @@ export default function Home() {
     const history: ActionHistory = {
       historyId: `HIS-${Date.now()}`,
       ticketId: selected.ticketId,
-      suggestedAction: createRecommendedAction(selected),
+      suggestedAction: activeSuggestion?.recommendedAction ?? "ESCALATE",
       finalAction: "ESCALATE",
       actionLabel: `${currentAgent.name} → ${
         agents.find((agent) => agent.agentId === agentId)?.name
@@ -170,6 +261,8 @@ export default function Home() {
       toAgentId: agentId,
       note,
       createdAt: new Date().toISOString(),
+      aiConfidence: activeSuggestion?.confidence,
+      policyReferences: activeSuggestion?.policyReferences,
     };
     const nextHistories = [history, ...histories];
     setDraft(finalDraft);
@@ -179,7 +272,11 @@ export default function Home() {
     window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(nextDrafts));
     window.localStorage.setItem(TICKET_STORAGE_KEY, JSON.stringify(nextTickets));
     window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(nextHistories));
-    setNotice("답변 초안과 함께 담당자에게 이관했습니다.");
+    setNotice(
+      finalDraft
+        ? "답변 초안과 함께 담당자에게 이관했습니다."
+        : "답변 초안 없이 담당자에게 이관했습니다."
+    );
   };
 
   return (
@@ -200,12 +297,12 @@ export default function Home() {
           assigneeName={assignee.name}
         />
         <AiAssistant
-          ticket={selected}
-          customerName={customer.name}
-          order={order}
-          policyResults={policyResults}
+          suggestion={activeSuggestion}
+          status={activeSuggestionStatus}
+          error={activeSuggestionError}
           draft={draft}
           onDraftChange={setDraft}
+          onRetry={() => setRetryVersion((current) => current + 1)}
           canEdit={canEdit}
         />
       </section>
@@ -215,6 +312,8 @@ export default function Home() {
         onApprove={approveTicket}
         isResolved={selected.status === "RESOLVED"}
         canEdit={canEdit}
+        canSaveDraft={Boolean(draft.trim() || activeSuggestion?.replyDraft)}
+        canApprove={Boolean(activeSuggestion)}
         transferTargets={agents.filter((agent) => agent.agentId !== selected.assigneeId)}
       />
       <Toast message={notice} onClose={() => setNotice("")} />

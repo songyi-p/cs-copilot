@@ -99,4 +99,6 @@ export type ActionHistory = {
   note?: string;
   fromAgentId?: string;
   toAgentId?: string;
+  aiConfidence?: LlmConfidence;
+  policyReferences?: LlmPolicyReference[];
 };
