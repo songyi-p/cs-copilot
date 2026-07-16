@@ -2,12 +2,12 @@ import OpenAI from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 import { ZodError } from "zod";
 import {
-  llmSuggestionRequestSchema,
-  llmSuggestionSchema,
-  type LlmPolicyContext,
-  type LlmSuggestion,
-  type LlmSuggestionRequest,
-} from "@/utils/llm-schemas";
+  aiSuggestionRequestSchema,
+  aiSuggestionSchema,
+  type AiPolicyContext,
+  type AiSuggestion,
+  type AiSuggestionRequest,
+} from "@/utils/ai-schemas";
 
 const DEFAULT_MODEL = "gpt-5-mini";
 
@@ -19,7 +19,7 @@ policyReferences에는 실제로 참고한 전달 정책의 policyId와 section�
 정책 근거가 없거나 판단이 불충분하면 confidence를 low로 설정하고 recommendedAction을 ESCALATE로 설정하세요.
 어떤 경우에도 환불이나 쿠폰 지급이 이미 확정 또는 실행된 것처럼 표현하지 마세요.`;
 
-class LlmSuggestionError extends Error {
+class AiSuggestionError extends Error {
   constructor(
     message: string,
     readonly code: "CONFIGURATION" | "PROVIDER" | "INVALID_RESPONSE"
@@ -28,12 +28,12 @@ class LlmSuggestionError extends Error {
   }
 }
 
-export const parseSuggestionRequest = (value: unknown): LlmSuggestionRequest =>
-  llmSuggestionRequestSchema.parse(value);
+export const parseAiSuggestionRequest = (value: unknown): AiSuggestionRequest =>
+  aiSuggestionRequestSchema.parse(value);
 
 const validatePolicyReferences = (
-  suggestion: LlmSuggestion,
-  suppliedPolicies: LlmPolicyContext[]
+  suggestion: AiSuggestion,
+  suppliedPolicies: AiPolicyContext[]
 ) => {
   const referencesAreValid = suggestion.policyReferences.every((reference) =>
     suppliedPolicies.some(
@@ -42,8 +42,8 @@ const validatePolicyReferences = (
   );
 
   if (!referencesAreValid) {
-    throw new LlmSuggestionError(
-      "The LLM referenced a policy that was not supplied.",
+    throw new AiSuggestionError(
+      "The AI referenced a policy that was not supplied.",
       "INVALID_RESPONSE"
     );
   }
@@ -51,12 +51,12 @@ const validatePolicyReferences = (
   return suggestion;
 };
 
-export const requestLlmSuggestion = async (
-  request: LlmSuggestionRequest
-): Promise<LlmSuggestion> => {
+export const requestAiSuggestion = async (
+  request: AiSuggestionRequest
+): Promise<AiSuggestion> => {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new LlmSuggestionError("OPENAI_API_KEY is not configured.", "CONFIGURATION");
+    throw new AiSuggestionError("OPENAI_API_KEY is not configured.", "CONFIGURATION");
   }
 
   const openai = new OpenAI({
@@ -74,29 +74,29 @@ export const requestLlmSuggestion = async (
         { role: "user", content: JSON.stringify(request) },
       ],
       text: {
-        format: zodTextFormat(llmSuggestionSchema, "cs_copilot_suggestion"),
+        format: zodTextFormat(aiSuggestionSchema, "cs_copilot_suggestion"),
       },
     });
 
     if (!response.output_parsed) {
-      throw new LlmSuggestionError("The LLM returned no parsed output.", "INVALID_RESPONSE");
+      throw new AiSuggestionError("The AI returned no parsed output.", "INVALID_RESPONSE");
     }
 
     return validatePolicyReferences(response.output_parsed, request.policies);
   } catch (error: unknown) {
-    if (error instanceof LlmSuggestionError) throw error;
+    if (error instanceof AiSuggestionError) throw error;
     if (error instanceof ZodError) {
-      throw new LlmSuggestionError("The LLM response failed schema validation.", "INVALID_RESPONSE");
+      throw new AiSuggestionError("The AI response failed schema validation.", "INVALID_RESPONSE");
     }
-    throw new LlmSuggestionError(
-      error instanceof Error ? error.message : "The LLM request failed.",
+    throw new AiSuggestionError(
+      error instanceof Error ? error.message : "The AI request failed.",
       "PROVIDER"
     );
   }
 };
 
-export const getLlmErrorStatus = (error: unknown) => {
-  if (error instanceof LlmSuggestionError && error.code === "CONFIGURATION") return 503;
-  if (error instanceof LlmSuggestionError) return 502;
+export const getAiErrorStatus = (error: unknown) => {
+  if (error instanceof AiSuggestionError && error.code === "CONFIGURATION") return 503;
+  if (error instanceof AiSuggestionError) return 502;
   return 500;
 };

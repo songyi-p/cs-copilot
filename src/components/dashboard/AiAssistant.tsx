@@ -1,5 +1,5 @@
-import type { LlmSuggestion } from "@/utils/types";
-import { confidenceLabel, recommendedActionLabel } from "@/utils/constants";
+import type { AiSuggestion } from "@/utils/types";
+import { aiConfidenceLabel, aiRecommendedActionLabel } from "@/utils/constants";
 import { cn } from "@/utils/cn";
 
 const sectionLabelClass = "mb-2.75 text-[11px] font-extrabold text-label";
@@ -18,7 +18,7 @@ export function AiAssistant({
   onRetry,
   canEdit,
 }: {
-  suggestion?: LlmSuggestion;
+  suggestion?: AiSuggestion;
   status: "loading" | "success" | "error";
   error: string;
   draft: string;
@@ -31,7 +31,7 @@ export function AiAssistant({
     suggestion?.confidence === "low"
       ? "담당자 이관 권장"
       : suggestion
-        ? recommendedActionLabel[suggestion.recommendedAction]
+        ? aiRecommendedActionLabel[suggestion.recommendedAction]
         : "AI 제안을 기다리는 중입니다.";
 
   return (
@@ -51,7 +51,7 @@ export function AiAssistant({
               confidenceStyles[suggestion.confidence]
             )}
           >
-            {confidenceLabel[suggestion.confidence]}
+            {aiConfidenceLabel[suggestion.confidence]}
           </span>
         ) : (
           <span className="rounded-[3px] bg-[#eef1f5] px-1.75 py-1 text-[10px] font-bold text-faint">

@@ -1,14 +1,14 @@
-import type { LlmConfidence, LlmPolicyReference } from "@/utils/llm-schemas";
+import type { AiConfidence, AiPolicyReference } from "@/utils/ai-schemas";
 
 export type {
-  LlmConfidence,
-  LlmOrderContext,
-  LlmPolicyContext,
-  LlmPolicyReference,
-  LlmSuggestion,
-  LlmSuggestionRequest,
-  RecommendedAction,
-} from "@/utils/llm-schemas";
+  AiConfidence,
+  AiOrderContext,
+  AiPolicyContext,
+  AiPolicyReference,
+  AiRecommendedAction,
+  AiSuggestion,
+  AiSuggestionRequest,
+} from "@/utils/ai-schemas";
 
 export type Ticket = {
   ticketId: string;
@@ -75,6 +75,6 @@ export type ActionHistory = {
   note?: string;
   fromAgentId?: string;
   toAgentId?: string;
-  aiConfidence?: LlmConfidence;
-  policyReferences?: LlmPolicyReference[];
+  aiConfidence?: AiConfidence;
+  policyReferences?: AiPolicyReference[];
 };

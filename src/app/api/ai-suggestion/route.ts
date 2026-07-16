@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import {
-  getLlmErrorStatus,
-  parseSuggestionRequest,
-  requestLlmSuggestion,
-} from "@/server/llm-suggestion";
+  getAiErrorStatus,
+  parseAiSuggestionRequest,
+  requestAiSuggestion,
+} from "@/server/ai-suggestion";
 
 export const runtime = "nodejs";
 
@@ -17,16 +17,16 @@ export async function POST(request: Request) {
 
   let input;
   try {
-    input = parseSuggestionRequest(body);
+    input = parseAiSuggestionRequest(body);
   } catch {
     return NextResponse.json({ error: "AI 제안 요청 데이터가 올바르지 않습니다." }, { status: 400 });
   }
 
   try {
-    const suggestion = await requestLlmSuggestion(input);
+    const suggestion = await requestAiSuggestion(input);
     return NextResponse.json(suggestion);
   } catch (error) {
-    const status = getLlmErrorStatus(error);
+    const status = getAiErrorStatus(error);
     const message =
       status === 503
         ? "AI 제안 기능이 아직 설정되지 않았습니다."

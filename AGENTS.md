@@ -14,7 +14,7 @@
 - `src/components/dashboard`: 고객센터 대시보드 UI입니다.
 - `src/hooks`: TanStack Query 기반 클라이언트 서버 상태 훅입니다.
 - `src/server`: OpenAI SDK를 사용하는 서버 전용 LLM 로직입니다.
-- `src/utils/llm-schemas.ts`: LLM 요청·응답의 공통 Zod 스키마와 타입입니다.
+- `src/utils/ai-schemas.ts`: AI 요청·응답의 공통 Zod 스키마와 타입입니다.
 - `src/utils/types.ts`: 공통 도메인 타입입니다.
 - `src/utils/lib.ts`: 정책 검색 및 도메인 유틸리티입니다.
 - `src/data/policies`: 원본 정책 문서입니다.

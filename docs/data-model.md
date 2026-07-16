@@ -41,7 +41,7 @@ Policy   (1) ─── PolicyReference (0..N)
 AI 제안은 고객 답변 초안, 정책 근거, 권장 처리 코드, 신뢰도로 구성한다.
 
 ```ts
-type LlmSuggestion = {
+type AiSuggestion = {
   replyDraft: string;
   policyReferences: {
     policyId: string;

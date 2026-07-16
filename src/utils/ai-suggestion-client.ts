@@ -1,6 +1,10 @@
 import axios from "axios";
 import { z } from "zod";
-import { llmSuggestionSchema, type LlmSuggestionRequest } from "@/utils/llm-schemas";
+import {
+  aiSuggestionSchema,
+  type AiSuggestion,
+  type AiSuggestionRequest,
+} from "@/utils/ai-schemas";
 
 const errorResponseSchema = z.object({ error: z.string() });
 
@@ -10,12 +14,12 @@ const apiClient = axios.create({
 });
 
 export const getAiSuggestion = async (
-  request: LlmSuggestionRequest,
+  request: AiSuggestionRequest,
   signal?: AbortSignal
-) => {
+): Promise<AiSuggestion> => {
   try {
     const response = await apiClient.post<unknown>("/api/ai-suggestion", request, { signal });
-    return llmSuggestionSchema.parse(response.data);
+    return aiSuggestionSchema.parse(response.data);
   } catch (error: unknown) {
     if (axios.isCancel(error)) throw error;
 

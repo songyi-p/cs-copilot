@@ -11,11 +11,11 @@ import type {
   ActionHistory,
   Agent,
   Customer,
-  LlmSuggestionRequest,
+  AiSuggestionRequest,
   Order,
   Ticket,
 } from "@/utils/types";
-import { recommendedActionLabel } from "@/utils/constants";
+import { aiRecommendedActionLabel } from "@/utils/constants";
 import { useAiSuggestion } from "@/hooks/use-ai-suggestion";
 import { searchPolicies } from "@/utils/lib";
 import actionHistoryData from "@/data/action-history.json";
@@ -59,7 +59,7 @@ export default function Home() {
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const assignee = agents.find((agent) => agent.agentId === selected.assigneeId)!;
   const canEdit = currentAgent.role === "ADMIN" || selected.assigneeId === currentAgent.agentId;
-  const suggestionRequest = useMemo<LlmSuggestionRequest>(
+  const suggestionRequest = useMemo<AiSuggestionRequest>(
     () => ({
       inquiry: selected.inquiry,
       order: order
@@ -139,7 +139,7 @@ export default function Home() {
       ticketId: selected.ticketId,
       suggestedAction: activeSuggestion.recommendedAction,
       finalAction: "APPROVED_RESPONSE",
-      actionLabel: recommendedActionLabel[activeSuggestion.recommendedAction],
+      actionLabel: aiRecommendedActionLabel[activeSuggestion.recommendedAction],
       eventType: "RESPONSE_APPROVED",
       aiDecision: finalResponse === originalDraft ? "ADOPTED" : "EDITED",
       agentId: "데모 담당자",

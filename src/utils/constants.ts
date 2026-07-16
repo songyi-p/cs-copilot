@@ -1,7 +1,7 @@
 import type {
   ActionHistory,
-  LlmConfidence,
-  RecommendedAction,
+  AiConfidence,
+  AiRecommendedAction,
 } from "@/utils/types";
 
 export const categoryLabel: Record<string, string> = {
@@ -39,13 +39,13 @@ export const aiDecisionLabel: Record<NonNullable<ActionHistory["aiDecision"]>, s
   REJECTED: "제안 미채택",
 };
 
-export const recommendedActionLabel: Record<RecommendedAction, string> = {
+export const aiRecommendedActionLabel: Record<AiRecommendedAction, string> = {
   REFUND_REVIEW: "환불 가능 여부 검토",
   DELAY_COUPON: "배송 지연 쿠폰 발급 검토",
   ESCALATE: "담당자 이관 권장",
 };
 
-export const confidenceLabel: Record<LlmConfidence, string> = {
+export const aiConfidenceLabel: Record<AiConfidence, string> = {
   high: "신뢰도 높음",
   medium: "신뢰도 보통",
   low: "신뢰도 낮음",
