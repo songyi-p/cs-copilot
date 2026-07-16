@@ -11,13 +11,12 @@ import type {
   ActionHistory,
   Agent,
   Customer,
-  LlmSuggestion,
   LlmSuggestionRequest,
   Order,
   Ticket,
 } from "@/utils/types";
 import { recommendedActionLabel } from "@/utils/constants";
-import { getAiSuggestion } from "@/utils/ai-suggestion-client";
+import { useAiSuggestion } from "@/hooks/use-ai-suggestion";
 import { searchPolicies } from "@/utils/lib";
 import actionHistoryData from "@/data/action-history.json";
 import customersData from "@/data/customers.json";
@@ -41,13 +40,6 @@ const HISTORY_STORAGE_KEY = "cs-copilot-action-history";
 const TICKET_STORAGE_KEY = "cs-copilot-tickets";
 const DRAFT_STORAGE_KEY = "cs-copilot-drafts";
 
-type SuggestionState = {
-  ticketId: string;
-  status: "loading" | "success" | "error";
-  suggestion?: LlmSuggestion;
-  error: string;
-};
-
 export default function Home() {
   const [tickets, setTickets] = useState(initialTickets);
   const [histories, setHistories] = useState(initialHistories);
@@ -55,12 +47,6 @@ export default function Home() {
   const [draft, setDraft] = useState("");
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState("");
-  const [suggestionState, setSuggestionState] = useState<SuggestionState>({
-    ticketId: initialTickets[0].ticketId,
-    status: "loading",
-    error: "",
-  });
-  const [retryVersion, setRetryVersion] = useState(0);
   const selected = useMemo(
     () => tickets.find((ticket) => ticket.ticketId === selectedId)!,
     [selectedId, tickets]
@@ -73,16 +59,8 @@ export default function Home() {
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const assignee = agents.find((agent) => agent.agentId === selected.assigneeId)!;
   const canEdit = currentAgent.role === "ADMIN" || selected.assigneeId === currentAgent.agentId;
-  const activeSuggestion =
-    suggestionState.ticketId === selected.ticketId ? suggestionState.suggestion : undefined;
-  const activeSuggestionStatus =
-    suggestionState.ticketId === selected.ticketId ? suggestionState.status : "loading";
-  const activeSuggestionError =
-    suggestionState.ticketId === selected.ticketId ? suggestionState.error : "";
-
-  useEffect(() => {
-    let active = true;
-    const request: LlmSuggestionRequest = {
+  const suggestionRequest = useMemo<LlmSuggestionRequest>(
+    () => ({
       inquiry: selected.inquiry,
       order: order
         ? {
@@ -100,36 +78,17 @@ export default function Home() {
         section,
         content,
       })),
-    };
-
-    setSuggestionState({
-      ticketId: selected.ticketId,
-      status: "loading",
-      error: "",
-    });
-    getAiSuggestion(request, retryVersion)
-      .then((suggestion) => {
-        if (!active) return;
-        setSuggestionState({
-          ticketId: selected.ticketId,
-          status: "success",
-          suggestion,
-          error: "",
-        });
-      })
-      .catch((error: unknown) => {
-        if (!active) return;
-        setSuggestionState({
-          ticketId: selected.ticketId,
-          status: "error",
-          error: error instanceof Error ? error.message : "AI 제안을 생성하지 못했습니다.",
-        });
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [order, policyResults, retryVersion, selected.inquiry, selected.ticketId]);
+    }),
+    [order, policyResults, selected.inquiry]
+  );
+  const suggestionQuery = useAiSuggestion(selected.ticketId, suggestionRequest);
+  const activeSuggestion = suggestionQuery.data;
+  const activeSuggestionStatus = suggestionQuery.isFetching
+    ? "loading"
+    : suggestionQuery.isError
+      ? "error"
+      : "success";
+  const activeSuggestionError = suggestionQuery.isError ? suggestionQuery.error.message : "";
 
   useEffect(() => {
     const saved = window.localStorage.getItem(HISTORY_STORAGE_KEY);
@@ -168,7 +127,6 @@ export default function Home() {
     setSelectedId(ticket.ticketId);
     setDraft(drafts[ticket.ticketId] ?? "");
     setNotice("");
-    setRetryVersion(0);
   };
 
   const approveTicket = () => {
@@ -302,7 +260,7 @@ export default function Home() {
           error={activeSuggestionError}
           draft={draft}
           onDraftChange={setDraft}
-          onRetry={() => setRetryVersion((current) => current + 1)}
+          onRetry={() => suggestionQuery.refetch()}
           canEdit={canEdit}
         />
       </section>
