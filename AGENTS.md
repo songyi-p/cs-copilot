@@ -12,6 +12,9 @@
 
 - `src/app`: Next.js 페이지와 서버 라우트입니다.
 - `src/components/dashboard`: 고객센터 대시보드 UI입니다.
+- `src/hooks`: TanStack Query 기반 클라이언트 서버 상태 훅입니다.
+- `src/server`: OpenAI SDK를 사용하는 서버 전용 LLM 로직입니다.
+- `src/utils/llm-schemas.ts`: LLM 요청·응답의 공통 Zod 스키마와 타입입니다.
 - `src/utils/types.ts`: 공통 도메인 타입입니다.
 - `src/utils/lib.ts`: 정책 검색 및 도메인 유틸리티입니다.
 - `src/data/policies`: 원본 정책 문서입니다.
@@ -47,6 +50,8 @@
 - LLM에는 고객 문의, 관련 주문 정보, 검색된 정책 섹션만 전달합니다.
 - 고객 프로필, 담당자 정보, 처리 이력 또는 관계없는 개인정보를 전달하지 않습니다.
 - LLM 응답은 신뢰할 수 없는 입력으로 간주하고 실행 시점에 검증합니다.
+- OpenAI Structured Outputs와 Zod 스키마를 함께 사용해 응답 구조와 TypeScript 타입을 일치시킵니다.
+- 클라이언트의 LLM 서버 상태는 TanStack Query로 관리하고 Axios를 API 전송 계층으로 사용합니다.
 - LLM에 전달한 정책에 실제로 존재하는 정책 근거만 허용합니다.
 - 신뢰도가 `low`이면 자동 권장 처리안 대신 `담당자 이관 권장`을 표시합니다.
 - LLM 호출이 실패하면 실패 상태를 표시하며, 하드코딩된 문구를 AI가 생성한 결과인 것처럼 대신 표시하지 않습니다.
