@@ -1,0 +1,110 @@
+[
+  {
+    "sectionId": "POL-DELIVERY-001-EXPECTED-DATE",
+    "policyId": "POL-DELIVERY-001",
+    "policyTitle": "배송 및 배송 지연 정책",
+    "category": "DELIVERY",
+    "section": "배송 예정일",
+    "content": "배송 예정일은 영업일 기준 예상 도착일이며, 택배사 사정이나 기상 악화에 따라 1~2일 차이가 발생할 수 있습니다.",
+    "keywords": ["배송 예정일", "예상 도착일", "언제 받을", "언제 도착", "택배"]
+  },
+  {
+    "sectionId": "POL-DELIVERY-001-DELAY",
+    "policyId": "POL-DELIVERY-001",
+    "policyTitle": "배송 및 배송 지연 정책",
+    "category": "DELIVERY",
+    "section": "배송 지연",
+    "content": "예정일보다 2일 이상 늦고 주문 상태가 IN_TRANSIT인 경우, 담당자는 사과 답변과 함께 3,000원 쿠폰 발급을 제안할 수 있습니다. 분실 또는 배송 정보 미갱신이 의심되면 택배사 확인을 위해 담당자 이관을 제안합니다.",
+    "keywords": ["배송 지연", "배송이 늦", "배송 예정일이 지났", "못 받았", "아직 안 왔", "조회가 멈", "분실"]
+  },
+  {
+    "sectionId": "POL-DELIVERY-001-ADDRESS",
+    "policyId": "POL-DELIVERY-001",
+    "policyTitle": "배송 및 배송 지연 정책",
+    "category": "DELIVERY",
+    "section": "배송지 변경",
+    "content": "상품이 출고되어 배송 중인 경우 배송지 변경은 보장할 수 없습니다. 담당자가 택배사 가능 여부를 확인한 뒤 안내합니다.",
+    "keywords": ["배송지 변경", "주소 변경", "배송 주소", "주소를 바꿀"]
+  },
+  {
+    "sectionId": "POL-REFUND-001-BEFORE-SHIPPING",
+    "policyId": "POL-REFUND-001",
+    "policyTitle": "환불 정책",
+    "category": "REFUND",
+    "section": "배송 전 취소",
+    "content": "출고 전 주문은 즉시 취소 요청을 접수할 수 있습니다.",
+    "keywords": ["배송 전 취소", "출고 전", "주문 취소", "결제 취소"]
+  },
+  {
+    "sectionId": "POL-REFUND-001-DELAY",
+    "policyId": "POL-REFUND-001",
+    "policyTitle": "환불 정책",
+    "category": "REFUND",
+    "section": "배송 지연 환불",
+    "content": "배송 예정일이 5일 이상 지났거나 분실이 확인된 경우 환불을 검토합니다. 배송 중인 주문은 택배사 확인 전 자동 환불하지 않으며 담당자 승인이 필요합니다.",
+    "keywords": ["배송 지연 환불", "못 받았", "아직 안 왔", "환불 가능", "분실"]
+  },
+  {
+    "sectionId": "POL-REFUND-001-PERIOD",
+    "policyId": "POL-REFUND-001",
+    "policyTitle": "환불 정책",
+    "category": "REFUND",
+    "section": "환불 처리 기간",
+    "content": "환불 승인 후 결제수단에 따라 3~5영업일 안에 환불됩니다.",
+    "keywords": ["환불 처리 기간", "환불 언제", "환불이 언제", "결제 수단으로 들어", "환불 현황"]
+  },
+  {
+    "sectionId": "POL-RETURN-001-PERIOD",
+    "policyId": "POL-RETURN-001",
+    "policyTitle": "반품 및 교환 정책",
+    "category": "RETURN",
+    "section": "신청 가능 기간",
+    "content": "상품 수령일로부터 7일 안에 반품 또는 교환을 신청할 수 있습니다.",
+    "keywords": ["반품 가능", "교환 가능", "반품하고", "교환하고", "언제까지", "7일"]
+  },
+  {
+    "sectionId": "POL-RETURN-001-FEE",
+    "policyId": "POL-RETURN-001",
+    "policyTitle": "반품 및 교환 정책",
+    "category": "RETURN",
+    "section": "반품 배송비",
+    "content": "단순 변심 반품은 왕복 배송비 6,000원을 차감합니다. 오배송·불량·상품 정보 상이의 경우 배송비를 차감하지 않습니다.",
+    "keywords": ["반품 배송비", "반품비", "배송비가 왜", "배송비 차감", "단순 변심", "화면에서 본 것과 달"]
+  },
+  {
+    "sectionId": "POL-RETURN-001-EXCHANGE",
+    "policyId": "POL-RETURN-001",
+    "policyTitle": "반품 및 교환 정책",
+    "category": "RETURN",
+    "section": "교환",
+    "content": "동일 상품의 색상 또는 사이즈 교환은 재고가 있을 때 가능합니다.",
+    "keywords": ["사이즈 교환", "색상 교환", "사이즈가 작", "사이즈가 크", "색상 변경", "색상을 변경", "교환"]
+  },
+  {
+    "sectionId": "POL-DEFECT-001-EVIDENCE",
+    "policyId": "POL-DEFECT-001",
+    "policyTitle": "불량 및 오배송 정책",
+    "category": "DEFECT",
+    "section": "증빙 확인",
+    "content": "불량 또는 오배송 문의는 상품 상태가 보이는 사진을 요청합니다.",
+    "keywords": ["불량", "오배송", "파손", "올이 풀", "하자", "사진"]
+  },
+  {
+    "sectionId": "POL-DEFECT-001-ACTION",
+    "policyId": "POL-DEFECT-001",
+    "policyTitle": "불량 및 오배송 정책",
+    "category": "DEFECT",
+    "section": "처리",
+    "content": "증빙 확인 후 교환 또는 환불을 제안하며, 반품 배송비는 차감하지 않습니다. 재고가 없는 경우 환불을 우선 제안합니다.",
+    "keywords": ["불량 교환", "불량 환불", "오배송 교환", "불량", "오배송", "올이 풀", "재고가 없"]
+  },
+  {
+    "sectionId": "POL-COUPON-001-DELAY",
+    "policyId": "POL-COUPON-001",
+    "policyTitle": "고객 보상 쿠폰 정책",
+    "category": "COMPENSATION",
+    "section": "배송 지연 쿠폰",
+    "content": "배송 예정일보다 2일 이상 지연된 주문에 대해 담당자는 3,000원 쿠폰 1장을 발급할 수 있습니다.",
+    "keywords": ["배송 지연", "배송이 늦", "배송 예정일이 지났", "쿠폰", "보상"]
+  }
+]
