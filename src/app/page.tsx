@@ -7,12 +7,11 @@ import { AiAssistant } from "@/components/dashboard/AiAssistant";
 import { AppHeader } from "@/components/dashboard/AppHeader";
 import { TicketDetail } from "@/components/dashboard/TicketDetail";
 import { TicketList } from "@/components/dashboard/TicketList";
-import type { ActionHistory, Agent, Customer, Order, PolicyReference, Ticket } from "@/utils/types";
-import { createDraft, createRecommendedAction } from "@/utils/lib";
+import type { ActionHistory, Agent, Customer, Order, Ticket } from "@/utils/types";
+import { createDraft, createRecommendedAction, searchPolicies } from "@/utils/lib";
 import actionHistoryData from "@/data/action-history.json";
 import customersData from "@/data/customers.json";
 import ordersData from "@/data/orders.json";
-import policyReferencesData from "@/data/policy-references.json";
 import ticketsData from "@/data/tickets.json";
 
 const agents: Agent[] = [
@@ -27,7 +26,6 @@ const initialTickets = (ticketsData as Ticket[]).map((ticket) => ({
 }));
 const customers = customersData as Customer[];
 const orders = ordersData as Order[];
-const policyReferences = policyReferencesData as PolicyReference[];
 const initialHistories = actionHistoryData as ActionHistory[];
 const HISTORY_STORAGE_KEY = "cs-copilot-action-history";
 const TICKET_STORAGE_KEY = "cs-copilot-tickets";
@@ -46,7 +44,7 @@ export default function Home() {
   );
   const customer = customers.find((item) => item.customerId === selected.customerId)!;
   const order = orders.find((item) => item.orderId === selected.orderId);
-  const references = policyReferences.filter((item) => item.ticketId === selected.ticketId);
+  const policyResults = searchPolicies(selected.inquiry);
   const ticketHistories = histories
     .filter((item) => item.ticketId === selected.ticketId)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -69,8 +67,8 @@ export default function Home() {
               ticket.assigneeId && agents.some((agent) => agent.agentId === ticket.assigneeId)
                 ? ticket.assigneeId
                 : ticket.ticketId === "TKT-1004"
-                  ? "agent-lee"
-                  : currentAgent.agentId,
+                ? "agent-lee"
+                : currentAgent.agentId,
           }))
         );
       }
@@ -163,7 +161,9 @@ export default function Home() {
       ticketId: selected.ticketId,
       suggestedAction: createRecommendedAction(selected),
       finalAction: "ESCALATE",
-      actionLabel: `${currentAgent.name} → ${agents.find((agent) => agent.agentId === agentId)?.name} 담당자 이관`,
+      actionLabel: `${currentAgent.name} → ${
+        agents.find((agent) => agent.agentId === agentId)?.name
+      } 담당자 이관`,
       eventType: "ESCALATED",
       agentId: currentAgent.agentId,
       fromAgentId: currentAgent.agentId,
@@ -203,7 +203,7 @@ export default function Home() {
           ticket={selected}
           customerName={customer.name}
           order={order}
-          references={references}
+          policyResults={policyResults}
           draft={draft}
           onDraftChange={setDraft}
           canEdit={canEdit}
