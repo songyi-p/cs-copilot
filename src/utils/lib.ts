@@ -1,4 +1,4 @@
-import type { Order, Ticket } from "@/components/dashboard/types";
+import type { Order, Ticket } from "@/utils/types";
 
 export const createDraft = (ticket: Ticket, name: string, order?: Order) => {
   if (ticket.category === "DELIVERY_DELAY")
@@ -11,3 +11,8 @@ export const createDraft = (ticket: Ticket, name: string, order?: Order) => {
     order ? ` (${order.productName})` : ""
   }. 정확한 처리를 위해 확인 후 안내드리겠습니다.`;
 };
+
+export const createRecommendedAction = (ticket: Ticket) =>
+  ticket.category === "DELIVERY_DELAY"
+    ? "택배사 확인 후 지연 안내 및 쿠폰 발급 검토"
+    : "정책 기준 확인 후 고객에게 처리 안내";

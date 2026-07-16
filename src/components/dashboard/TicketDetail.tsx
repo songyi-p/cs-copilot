@@ -1,5 +1,6 @@
-import type { Customer, Order, Ticket } from "@/components/dashboard/types";
-import { categoryLabel, formatDate, formatDateTime, statusLabel } from "@/components/dashboard/types";
+import type { ActionHistory, Customer, Order, Ticket } from "@/utils/types";
+import { aiDecisionLabel, categoryLabel, orderStatusLabel, statusLabel } from "@/utils/constants";
+import { formatDate, formatDateTime } from "@/utils/formatters";
 import { cn } from "@/utils/cn";
 
 const statusStyles: Record<string, string> = {
@@ -18,19 +19,32 @@ export function TicketDetail({
   ticket,
   customer,
   order,
+  histories,
 }: {
   ticket: Ticket;
   customer: Customer;
   order?: Order;
+  histories: ActionHistory[];
 }) {
   return (
     <section className="mx-auto min-h-0 w-full max-w-215 overflow-y-auto px-8.5 pt-5.5 pb-9.5 max-mobile:px-4 max-mobile:py-5.5">
       <div className="mb-5.5 flex items-start justify-between">
         <div>
-          <p className="mb-1 font-mono text-[10px] font-medium tracking-[1.3px] text-eyebrow">TICKET {ticket.ticketId}</p>
-          <h2 className="m-0 text-[22px] font-bold tracking-[-0.5px]">{categoryLabel[ticket.category]} 문의</h2>
+          <p className="mb-1 font-mono text-[10px] font-medium tracking-[1.3px] text-eyebrow">
+            TICKET {ticket.ticketId}
+          </p>
+          <h2 className="m-0 text-[22px] font-bold tracking-[-0.5px]">
+            {categoryLabel[ticket.category]} 문의
+          </h2>
         </div>
-        <span className={cn("inline-block rounded-[3px] px-1.75 py-0.75 text-[10px] font-bold", statusStyles[ticket.status])}>{statusLabel[ticket.status]}</span>
+        <span
+          className={cn(
+            "inline-block rounded-[3px] px-1.75 py-0.75 text-[10px] font-bold",
+            statusStyles[ticket.status]
+          )}
+        >
+          {statusLabel[ticket.status]}
+        </span>
       </div>
       <article className={cn(cardClass, "mb-4.5 px-5 py-4.5")}>
         <p className="mb-2.25 text-[11px] font-extrabold text-label">고객 문의</p>
@@ -50,7 +64,9 @@ export function TicketDetail({
             <div className={detailRowClass}>
               <dt className={termClass}>등급</dt>
               <dd className={descriptionClass}>
-                <span className="rounded-[3px] bg-[#fff2df] px-1.5 py-0.5 text-[10px] text-[#a66c23]">{customer.grade}</span>
+                <span className="rounded-[3px] bg-[#fff2df] px-1.5 py-0.5 text-[10px] text-[#a66c23]">
+                  {customer.grade}
+                </span>
               </dd>
             </div>
             <div className={detailRowClass}>
@@ -83,7 +99,9 @@ export function TicketDetail({
               </div>
               <div className={detailRowClass}>
                 <dt className={termClass}>주문 상태</dt>
-                <dd className={descriptionClass}>{order.orderStatus}</dd>
+                <dd className={descriptionClass}>
+                  {orderStatusLabel[order.orderStatus] ?? order.orderStatus}
+                </dd>
               </div>
             </dl>
           ) : (
@@ -99,7 +117,9 @@ export function TicketDetail({
           <div className="grid grid-cols-3 max-mobile:grid-cols-1 max-mobile:gap-3.5 [&>div]:flex [&>div]:flex-col [&>div]:gap-1.75 [&>div]:border-r [&>div]:border-[#edf0f4] [&>div]:pl-3.75 [&>div:first-child]:pl-0 [&>div:last-child]:border-0 max-mobile:[&>div]:border-0 max-mobile:[&>div]:pl-0">
             <div>
               <span className="text-[11px] text-term">배송 상태</span>
-              <strong className="text-xs">{order.orderStatus === "IN_TRANSIT" ? "배송 중" : order.orderStatus}</strong>
+              <strong className="text-xs">
+                {orderStatusLabel[order.orderStatus] ?? order.orderStatus}
+              </strong>
             </div>
             <div>
               <span className="text-[11px] text-term">예상 도착일</span>
@@ -112,6 +132,41 @@ export function TicketDetail({
           </div>
         ) : (
           <p className="m-0 text-xs text-faint">배송 정보가 없습니다.</p>
+        )}
+      </article>
+      <article className={cn(cardClass, "mt-3.5 p-4.5")}>
+        <div className="mb-4.25 flex items-center justify-between text-[13px] font-extrabold">
+          <span>
+            <span className="mr-1.75 text-info-accent">✓</span> 처리 이력
+          </span>
+          <span className="text-[10px] font-semibold text-faint">{histories.length}건</span>
+        </div>
+        {histories.length ? (
+          <div className="space-y-3">
+            {histories.map((history) => (
+              <div
+                className="rounded-md border border-[#edf0f4] bg-[#fbfcff] p-3.5"
+                key={history.historyId}
+              >
+                <div className="mb-2 flex items-start justify-between gap-3">
+                  <strong className="text-xs">{history.actionLabel ?? history.finalAction}</strong>
+                  <span className="shrink-0 rounded-[3px] bg-status-resolved-bg px-1.5 py-0.5 text-[10px] font-bold text-status-resolved">
+                    {aiDecisionLabel[history.aiDecision]}
+                  </span>
+                </div>
+                {history.finalResponse && (
+                  <p className="mb-2 whitespace-pre-wrap text-[11px] leading-[1.6] text-muted">
+                    {history.finalResponse}
+                  </p>
+                )}
+                <p className="m-0 text-[10px] text-timestamp">
+                  {history.agentId} · {formatDateTime(history.createdAt)}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="m-0 text-xs text-faint">아직 등록된 처리 이력이 없습니다.</p>
         )}
       </article>
     </section>

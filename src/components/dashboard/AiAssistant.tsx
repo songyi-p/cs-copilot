@@ -1,5 +1,5 @@
-import type { Order, PolicyReference, Ticket } from "@/components/dashboard/types";
-import { createDraft } from "@/utils/lib";
+import type { Order, PolicyReference, Ticket } from "@/utils/types";
+import { createDraft, createRecommendedAction } from "@/utils/lib";
 
 const sectionLabelClass = "mb-2.75 text-[11px] font-extrabold text-label";
 
@@ -65,11 +65,7 @@ export function AiAssistant({
       </section>
       <section className="rounded-[7px] border border-[#d9d5f5] bg-[#f7f5ff] p-3.75">
         <div className="mb-2.75 text-[11px] font-extrabold text-[#7667bd]">권장 처리안</div>
-        <strong className="text-xs leading-[1.6]">
-          {ticket.category === "DELIVERY_DELAY"
-            ? "택배사 확인 후 지연 안내 및 쿠폰 발급 검토"
-            : "정책 기준 확인 후 고객에게 처리 안내"}
-        </strong>
+        <strong className="text-xs leading-[1.6]">{createRecommendedAction(ticket)}</strong>
         <p className="mt-1.75 mb-0 text-[11px] text-[#778199]">
           고객 등급과 주문 상태를 반영한 제안입니다.
         </p>
