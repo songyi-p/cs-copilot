@@ -20,11 +20,13 @@ export function TicketDetail({
   customer,
   order,
   histories,
+  assigneeName,
 }: {
   ticket: Ticket;
   customer: Customer;
   order?: Order;
   histories: ActionHistory[];
+  assigneeName: string;
 }) {
   return (
     <section className="mx-auto min-h-0 w-full max-w-215 overflow-y-auto px-8.5 pt-5.5 pb-9.5 max-mobile:px-4 max-mobile:py-5.5">
@@ -37,15 +39,22 @@ export function TicketDetail({
             {categoryLabel[ticket.category]} 문의
           </h2>
         </div>
-        <span
-          className={cn(
-            "inline-block rounded-[3px] px-1.75 py-0.75 text-[10px] font-bold",
-            statusStyles[ticket.status]
-          )}
-        >
-          {statusLabel[ticket.status]}
-        </span>
+        <span className={cn("inline-block rounded-[3px] px-1.75 py-0.75 text-[10px] font-bold", statusStyles[ticket.status])}>{statusLabel[ticket.status]}</span>
       </div>
+      <article className={cn(cardClass, "mb-3.5 flex items-center justify-between px-5 py-3.5")}>
+        <div className="flex items-center gap-3">
+          <span className="grid size-9 place-items-center rounded-full bg-[#e8edff] text-sm font-extrabold text-[#526ad0]">
+            {assigneeName.slice(0, 1)}
+          </span>
+          <div>
+            <p className="mb-0.5 text-[10px] font-bold text-label">현재 담당자</p>
+            <strong className="text-[13px]">{assigneeName}</strong>
+          </div>
+        </div>
+        <span className="rounded-[3px] bg-[#e8f7f0] px-2 py-1 text-[10px] font-bold text-[#3c8a6a]">
+          담당 중
+        </span>
+      </article>
       <article className={cn(cardClass, "mb-4.5 px-5 py-4.5")}>
         <p className="mb-2.25 text-[11px] font-extrabold text-label">고객 문의</p>
         <p className="mb-2.75 text-[15px] font-semibold leading-[1.6]">“{ticket.inquiry}”</p>
@@ -150,15 +159,14 @@ export function TicketDetail({
               >
                 <div className="mb-2 flex items-start justify-between gap-3">
                   <strong className="text-xs">{history.actionLabel ?? history.finalAction}</strong>
-                  <span className="shrink-0 rounded-[3px] bg-status-resolved-bg px-1.5 py-0.5 text-[10px] font-bold text-status-resolved">
-                    {aiDecisionLabel[history.aiDecision]}
-                  </span>
+                  {history.aiDecision && <span className="shrink-0 rounded-[3px] bg-status-resolved-bg px-1.5 py-0.5 text-[10px] font-bold text-status-resolved">{aiDecisionLabel[history.aiDecision]}</span>}
                 </div>
                 {history.finalResponse && (
                   <p className="mb-2 whitespace-pre-wrap text-[11px] leading-[1.6] text-muted">
                     {history.finalResponse}
                   </p>
                 )}
+                {history.note && <p className="mb-2 text-[11px] leading-[1.6] text-muted">이관 메모: {history.note}</p>}
                 <p className="m-0 text-[10px] text-timestamp">
                   {history.agentId} · {formatDateTime(history.createdAt)}
                 </p>

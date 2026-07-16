@@ -1,18 +1,25 @@
 import { useState } from "react";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { TransferDialog } from "@/components/dashboard/TransferDialog";
+import type { Agent } from "@/utils/types";
 
 export function ActionBar({
-  onEdit,
-  onEscalate,
+  onSaveDraft,
+  onTransfer,
   onApprove,
   isResolved,
+  canEdit,
+  transferTargets,
 }: {
-  onEdit: () => void;
-  onEscalate: () => void;
+  onSaveDraft: () => void;
+  onTransfer: (agentId: string, note: string) => void;
   onApprove: () => void;
   isResolved: boolean;
+  canEdit: boolean;
+  transferTargets: Agent[];
 }) {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isTransferOpen, setIsTransferOpen] = useState(false);
 
   const confirmApproval = () => {
     setIsConfirmOpen(false);
@@ -25,20 +32,22 @@ export function ActionBar({
         <div className="flex gap-2.5">
           <button
             className="rounded-md border border-[#dbe1e9] bg-white px-3.75 py-2.5 text-xs font-bold text-[#536173] max-mobile:px-2.5 max-mobile:py-2"
-            onClick={onEdit}
+            onClick={onSaveDraft}
+            disabled={!canEdit || isResolved}
           >
-            수정
+            임시 저장
           </button>
           <button
             className="rounded-md border border-[#d6cdf6] bg-[#fbfaff] px-3.75 py-2.5 text-xs font-bold text-[#6250bb] max-mobile:px-2.5 max-mobile:py-2"
-            onClick={onEscalate}
+            onClick={() => setIsTransferOpen(true)}
+            disabled={!canEdit || isResolved}
           >
             담당자 이관
           </button>
           <button
             className="rounded-md border border-action-primary bg-action-primary py-2.5 pr-3.75 pl-4.5 text-xs font-bold text-white disabled:cursor-not-allowed disabled:border-[#aab3c5] disabled:bg-[#aab3c5] max-mobile:px-2.5 max-mobile:py-2"
             onClick={() => setIsConfirmOpen(true)}
-            disabled={isResolved}
+            disabled={!canEdit || isResolved}
           >
             {isResolved ? "처리 완료" : "답변 승인"}{" "}
             <span className="ml-2 text-base leading-none">→</span>
@@ -51,6 +60,15 @@ export function ActionBar({
         description="승인한 답변은 처리 이력에 저장되며 티켓이 처리 완료 상태로 변경됩니다."
         onCancel={() => setIsConfirmOpen(false)}
         onConfirm={confirmApproval}
+      />
+      <TransferDialog
+        open={isTransferOpen}
+        agents={transferTargets}
+        onCancel={() => setIsTransferOpen(false)}
+        onTransfer={(agentId, note) => {
+          setIsTransferOpen(false);
+          onTransfer(agentId, note);
+        }}
       />
     </>
   );

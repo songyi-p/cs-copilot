@@ -10,6 +10,7 @@ export function AiAssistant({
   references,
   draft,
   onDraftChange,
+  canEdit,
 }: {
   ticket: Ticket;
   customerName: string;
@@ -17,6 +18,7 @@ export function AiAssistant({
   references: PolicyReference[];
   draft: string;
   onDraftChange: (draft: string) => void;
+  canEdit: boolean;
 }) {
   const response = draft || createDraft(ticket, customerName, order);
   return (
@@ -37,11 +39,17 @@ export function AiAssistant({
         <div className={sectionLabelClass}>
           AI 답변 초안 <span className="ml-1.5 font-semibold text-[#7790de]">자동 생성</span>
         </div>
+        {!canEdit && (
+          <p className="mb-2.5 rounded-md bg-status-review-bg px-3 py-2 text-[11px] font-semibold text-[#8b641d]">
+            현재 담당자만 답변을 수정하고 승인할 수 있습니다.
+          </p>
+        )}
         <textarea
-          className="min-h-33.75 w-full resize-y rounded-md border border-[#dce2ea] bg-[#fbfcff] p-3.25 text-xs leading-[1.7] text-[#344052] outline-[#7389e8] select-text"
+          className="min-h-33.75 w-full resize-y rounded-md border border-[#dce2ea] bg-[#fbfcff] p-3.25 text-xs leading-[1.7] text-[#344052] outline-[#7389e8] select-text disabled:cursor-not-allowed disabled:bg-[#f3f5f8] disabled:text-[#788394]"
           value={response}
           onChange={(event) => onDraftChange(event.target.value)}
           aria-label="AI 답변 초안"
+          disabled={!canEdit}
         />
       </section>
       <section className="mb-5 border-b border-line pb-5 max-dashboard:max-w-162.5">
