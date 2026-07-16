@@ -6,6 +6,13 @@ export type Ticket = {
   category: string;
   status: string;
   createdAt: string;
+  assigneeId: string;
+};
+
+export type Agent = {
+  agentId: string;
+  name: string;
+  role: "AGENT" | "ADMIN";
 };
 
 export type Customer = {
@@ -40,9 +47,13 @@ export type ActionHistory = {
   ticketId: string;
   suggestedAction: string;
   finalAction: string;
-  aiDecision: "ADOPTED" | "EDITED" | "REJECTED";
+  aiDecision?: "ADOPTED" | "EDITED" | "REJECTED";
   agentId: string;
   createdAt: string;
   finalResponse?: string;
   actionLabel?: string;
+  eventType?: "DRAFT_SAVED" | "ESCALATED" | "RESPONSE_APPROVED";
+  note?: string;
+  fromAgentId?: string;
+  toAgentId?: string;
 };

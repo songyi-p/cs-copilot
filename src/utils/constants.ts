@@ -29,7 +29,7 @@ export const orderStatusLabel: Record<string, string> = {
   REFUNDED: "환불 완료",
 };
 
-export const aiDecisionLabel: Record<ActionHistory["aiDecision"], string> = {
+export const aiDecisionLabel: Record<NonNullable<ActionHistory["aiDecision"]>, string> = {
   ADOPTED: "초안 그대로 승인",
   EDITED: "수정 후 승인",
   REJECTED: "제안 미채택",
