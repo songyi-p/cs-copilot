@@ -1,44 +1,15 @@
-import type {
-  LlmPolicyContext,
-  LlmSuggestion,
-  LlmSuggestionRequest,
-} from "@/utils/types";
+import OpenAI from "openai";
+import { zodTextFormat } from "openai/helpers/zod";
+import { ZodError } from "zod";
+import {
+  llmSuggestionRequestSchema,
+  llmSuggestionSchema,
+  type LlmPolicyContext,
+  type LlmSuggestion,
+  type LlmSuggestionRequest,
+} from "@/utils/llm-schemas";
 
-const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const DEFAULT_MODEL = "gpt-5-mini";
-const MAX_INQUIRY_LENGTH = 4_000;
-const MAX_POLICY_CONTENT_LENGTH = 8_000;
-const MAX_POLICIES = 4;
-
-const suggestionSchema = {
-  type: "object",
-  additionalProperties: false,
-  properties: {
-    replyDraft: { type: "string" },
-    policyReferences: {
-      type: "array",
-      items: {
-        type: "object",
-        additionalProperties: false,
-        properties: {
-          policyId: { type: "string" },
-          section: { type: "string" },
-          reason: { type: "string" },
-        },
-        required: ["policyId", "section", "reason"],
-      },
-    },
-    recommendedAction: {
-      type: "string",
-      enum: ["REFUND_REVIEW", "DELAY_COUPON", "ESCALATE"],
-    },
-    confidence: {
-      type: "string",
-      enum: ["high", "medium", "low"],
-    },
-  },
-  required: ["replyDraft", "policyReferences", "recommendedAction", "confidence"],
-} as const;
 
 const systemPrompt = `당신은 쇼핑몰 고객센터 담당자를 돕는 AI입니다.
 사용자 입력으로 전달된 고객 문의, 주문 정보, 정책만 근거로 답변하세요.
@@ -57,137 +28,27 @@ class LlmSuggestionError extends Error {
   }
 }
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
+export const parseSuggestionRequest = (value: unknown): LlmSuggestionRequest =>
+  llmSuggestionRequestSchema.parse(value);
 
-const isNonEmptyString = (value: unknown): value is string =>
-  typeof value === "string" && value.trim().length > 0;
-
-const optionalString = (value: unknown, maxLength: number) =>
-  typeof value === "string" ? value.slice(0, maxLength) : null;
-
-const requireString = (value: unknown, field: string, maxLength: number) => {
-  if (!isNonEmptyString(value)) throw new Error(`${field} is required.`);
-  return value.trim().slice(0, maxLength);
-};
-
-const parsePolicy = (value: unknown): LlmPolicyContext => {
-  if (!isRecord(value)) throw new Error("Each policy must be an object.");
-
-  return {
-    policyId: requireString(value.policyId, "policyId", 100),
-    section: requireString(value.section, "section", 300),
-    content: requireString(value.content, "content", MAX_POLICY_CONTENT_LENGTH),
-  };
-};
-
-export const parseSuggestionRequest = (value: unknown): LlmSuggestionRequest => {
-  if (!isRecord(value)) throw new Error("Request body must be an object.");
-
-  const inquiry = requireString(value.inquiry, "inquiry", MAX_INQUIRY_LENGTH);
-  const policies = Array.isArray(value.policies)
-    ? value.policies.slice(0, MAX_POLICIES).map(parsePolicy)
-    : [];
-
-  if (value.order === null || value.order === undefined) {
-    return { inquiry, order: null, policies };
-  }
-  if (!isRecord(value.order)) throw new Error("order must be an object or null.");
-
-  const paymentAmount = value.order.paymentAmount;
-  if (typeof paymentAmount !== "number" || !Number.isFinite(paymentAmount) || paymentAmount < 0) {
-    throw new Error("paymentAmount must be a non-negative number.");
-  }
-
-  return {
-    inquiry,
-    order: {
-      orderId: requireString(value.order.orderId, "orderId", 100),
-      productName: requireString(value.order.productName, "productName", 500),
-      orderStatus: requireString(value.order.orderStatus, "orderStatus", 100),
-      orderedAt: requireString(value.order.orderedAt, "orderedAt", 100),
-      deliveryExpectedAt: optionalString(value.order.deliveryExpectedAt, 100),
-      deliveredAt: optionalString(value.order.deliveredAt, 100),
-      paymentAmount,
-    },
-    policies,
-  };
-};
-
-const extractOutputText = (value: unknown) => {
-  if (!isRecord(value) || !Array.isArray(value.output)) return null;
-
-  for (const item of value.output) {
-    if (!isRecord(item) || !Array.isArray(item.content)) continue;
-    for (const content of item.content) {
-      if (isRecord(content) && content.type === "output_text" && typeof content.text === "string") {
-        return content.text;
-      }
-    }
-  }
-
-  return null;
-};
-
-const validateSuggestion = (
-  value: unknown,
+const validatePolicyReferences = (
+  suggestion: LlmSuggestion,
   suppliedPolicies: LlmPolicyContext[]
-): LlmSuggestion => {
-  if (!isRecord(value)) {
-    throw new LlmSuggestionError("The LLM response was not an object.", "INVALID_RESPONSE");
-  }
-
-  const actions = ["REFUND_REVIEW", "DELAY_COUPON", "ESCALATE"] as const;
-  const confidences = ["high", "medium", "low"] as const;
-  if (!isNonEmptyString(value.replyDraft)) {
-    throw new LlmSuggestionError("The reply draft was empty.", "INVALID_RESPONSE");
-  }
-  if (!actions.some((action) => action === value.recommendedAction)) {
-    throw new LlmSuggestionError("The recommended action was invalid.", "INVALID_RESPONSE");
-  }
-  if (!confidences.some((confidence) => confidence === value.confidence)) {
-    throw new LlmSuggestionError("The confidence was invalid.", "INVALID_RESPONSE");
-  }
-  if (!Array.isArray(value.policyReferences)) {
-    throw new LlmSuggestionError("Policy references were invalid.", "INVALID_RESPONSE");
-  }
-
-  const policyReferences = value.policyReferences.map((reference) => {
-    if (
-      !isRecord(reference) ||
-      !isNonEmptyString(reference.policyId) ||
-      !isNonEmptyString(reference.section) ||
-      !isNonEmptyString(reference.reason)
-    ) {
-      throw new LlmSuggestionError("A policy reference was invalid.", "INVALID_RESPONSE");
-    }
-
-    const exists = suppliedPolicies.some(
+) => {
+  const referencesAreValid = suggestion.policyReferences.every((reference) =>
+    suppliedPolicies.some(
       (policy) => policy.policyId === reference.policyId && policy.section === reference.section
+    )
+  );
+
+  if (!referencesAreValid) {
+    throw new LlmSuggestionError(
+      "The LLM referenced a policy that was not supplied.",
+      "INVALID_RESPONSE"
     );
-    if (!exists) {
-      throw new LlmSuggestionError(
-        "The LLM referenced a policy that was not supplied.",
-        "INVALID_RESPONSE"
-      );
-    }
+  }
 
-    return {
-      policyId: reference.policyId,
-      section: reference.section,
-      reason: reference.reason,
-    };
-  });
-
-  const recommendedAction = actions.find((action) => action === value.recommendedAction)!;
-  const confidence = confidences.find((item) => item === value.confidence)!;
-
-  return {
-    replyDraft: value.replyDraft.trim(),
-    policyReferences,
-    recommendedAction,
-    confidence,
-  };
+  return suggestion;
 };
 
 export const requestLlmSuggestion = async (
@@ -198,13 +59,14 @@ export const requestLlmSuggestion = async (
     throw new LlmSuggestionError("OPENAI_API_KEY is not configured.", "CONFIGURATION");
   }
 
-  const response = await fetch(OPENAI_RESPONSES_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  const openai = new OpenAI({
+    apiKey,
+    timeout: 30_000,
+    maxRetries: 2,
+  });
+
+  try {
+    const response = await openai.responses.parse({
       model: process.env.OPENAI_MODEL || DEFAULT_MODEL,
       store: false,
       input: [
@@ -212,40 +74,25 @@ export const requestLlmSuggestion = async (
         { role: "user", content: JSON.stringify(request) },
       ],
       text: {
-        format: {
-          type: "json_schema",
-          name: "cs_copilot_suggestion",
-          strict: true,
-          schema: suggestionSchema,
-        },
+        format: zodTextFormat(llmSuggestionSchema, "cs_copilot_suggestion"),
       },
-    }),
-    signal: AbortSignal.timeout(30_000),
-  }).catch((error: unknown) => {
+    });
+
+    if (!response.output_parsed) {
+      throw new LlmSuggestionError("The LLM returned no parsed output.", "INVALID_RESPONSE");
+    }
+
+    return validatePolicyReferences(response.output_parsed, request.policies);
+  } catch (error: unknown) {
+    if (error instanceof LlmSuggestionError) throw error;
+    if (error instanceof ZodError) {
+      throw new LlmSuggestionError("The LLM response failed schema validation.", "INVALID_RESPONSE");
+    }
     throw new LlmSuggestionError(
       error instanceof Error ? error.message : "The LLM request failed.",
       "PROVIDER"
     );
-  });
-
-  if (!response.ok) {
-    throw new LlmSuggestionError(`The LLM provider returned ${response.status}.`, "PROVIDER");
   }
-
-  const providerResponse: unknown = await response.json();
-  const outputText = extractOutputText(providerResponse);
-  if (!outputText) {
-    throw new LlmSuggestionError("The LLM returned no text output.", "INVALID_RESPONSE");
-  }
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(outputText);
-  } catch {
-    throw new LlmSuggestionError("The LLM output was not valid JSON.", "INVALID_RESPONSE");
-  }
-
-  return validateSuggestion(parsed, request.policies);
 };
 
 export const getLlmErrorStatus = (error: unknown) => {
