@@ -1,5 +1,6 @@
-import type { Customer, Ticket } from "@/components/dashboard/types";
-import { categoryLabel, formatDate, statusLabel } from "@/components/dashboard/types";
+import type { Customer, Ticket } from "@/utils/types";
+import { categoryLabel, statusLabel } from "@/utils/constants";
+import { formatDate } from "@/utils/formatters";
 import { cn } from "@/utils/cn";
 
 const statusStyles: Record<string, string> = {
