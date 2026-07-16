@@ -49,6 +49,42 @@ export type PolicySearchResult = PolicySearchItem & {
   score: number;
 };
 
+export type RecommendedAction = "REFUND_REVIEW" | "DELAY_COUPON" | "ESCALATE";
+
+export type LlmConfidence = "high" | "medium" | "low";
+
+export type LlmPolicyReference = {
+  policyId: string;
+  section: string;
+  reason: string;
+};
+
+export type LlmSuggestion = {
+  replyDraft: string;
+  policyReferences: LlmPolicyReference[];
+  recommendedAction: RecommendedAction;
+  confidence: LlmConfidence;
+};
+
+export type LlmOrderContext = Pick<
+  Order,
+  | "orderId"
+  | "productName"
+  | "orderStatus"
+  | "orderedAt"
+  | "deliveryExpectedAt"
+  | "deliveredAt"
+  | "paymentAmount"
+>;
+
+export type LlmPolicyContext = Pick<PolicySearchResult, "policyId" | "section" | "content">;
+
+export type LlmSuggestionRequest = {
+  inquiry: string;
+  order: LlmOrderContext | null;
+  policies: LlmPolicyContext[];
+};
+
 export type ActionHistory = {
   historyId: string;
   ticketId: string;
