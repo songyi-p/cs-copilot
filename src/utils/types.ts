@@ -34,12 +34,19 @@ export type Order = {
   paymentAmount: number;
 };
 
-export type PolicyReference = {
-  referenceId: string;
-  ticketId: string;
+export type PolicySearchItem = {
+  sectionId: string;
   policyId: string;
+  policyTitle: string;
+  category: string;
   section: string;
-  reason: string;
+  content: string;
+  keywords: string[];
+};
+
+export type PolicySearchResult = PolicySearchItem & {
+  matchedKeywords: string[];
+  score: number;
 };
 
 export type ActionHistory = {
