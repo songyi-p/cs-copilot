@@ -1,4 +1,4 @@
-import type { Order, PolicyReference, Ticket } from "@/utils/types";
+import type { Order, PolicySearchResult, Ticket } from "@/utils/types";
 import { createDraft, createRecommendedAction } from "@/utils/lib";
 
 const sectionLabelClass = "mb-2.75 text-[11px] font-extrabold text-label";
@@ -7,7 +7,7 @@ export function AiAssistant({
   ticket,
   customerName,
   order,
-  references,
+  policyResults,
   draft,
   onDraftChange,
   canEdit,
@@ -15,7 +15,7 @@ export function AiAssistant({
   ticket: Ticket;
   customerName: string;
   order?: Order;
-  references: PolicyReference[];
+  policyResults: PolicySearchResult[];
   draft: string;
   onDraftChange: (draft: string) => void;
   canEdit: boolean;
@@ -54,21 +54,21 @@ export function AiAssistant({
       </section>
       <section className="mb-5 border-b border-line pb-5 max-dashboard:max-w-162.5">
         <div className={sectionLabelClass}>정책 근거</div>
-        {references.length ? (
-          references.map((reference) => (
-            <div className="my-3.25 flex gap-2.5" key={reference.referenceId}>
+        {policyResults.length ? (
+          policyResults.map((result) => (
+            <div className="my-3.25 flex gap-2.5" key={result.sectionId}>
               <span className="grid size-6.25 shrink-0 place-items-center rounded bg-[#f0edff] text-[#7968da]">
                 ▤
               </span>
               <div>
-                <strong className="text-xs">{reference.section}</strong>
-                <p className="my-0.75 text-[11px] leading-[1.45] text-muted">{reference.reason}</p>
-                <small className="font-mono text-[9px] text-faint">{reference.policyId}</small>
+                <strong className="text-xs">{result.section}</strong>
+                <p className="my-0.75 text-[11px] leading-[1.45] text-muted">{result.content}</p>
+                <small className="font-mono text-[9px] text-faint">{result.policyId} · {result.policyTitle}</small>
               </div>
             </div>
           ))
         ) : (
-          <p className="m-0 text-xs text-faint">연결된 정책 근거가 없습니다.</p>
+          <p className="m-0 text-xs text-faint">일치하는 정책을 찾지 못했습니다.</p>
         )}
       </section>
       <section className="rounded-[7px] border border-[#d9d5f5] bg-[#f7f5ff] p-3.75">
