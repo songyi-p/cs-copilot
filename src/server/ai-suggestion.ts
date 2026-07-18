@@ -2,6 +2,11 @@ import OpenAI from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 import { ZodError } from "zod";
 import {
+  AI_CONFIDENCE_REASON_MAX_LENGTH,
+  AI_MISSING_INFORMATION_MAX_COUNT,
+  AI_POLICY_REASON_MAX_LENGTH,
+  AI_POLICY_REFERENCE_MAX_COUNT,
+  AI_REPLY_DRAFT_MAX_LENGTH,
   aiProviderSuggestionSchema,
   aiSuggestionRequestSchema,
   parseAiProviderSuggestion,
@@ -13,6 +18,7 @@ import {
 } from "@/utils/ai-schemas";
 
 const DEFAULT_MODEL = "gpt-5.4-nano";
+const PROMPT_CACHE_KEY = "cs-copilot-ai-suggestion-v3";
 
 const systemPrompt = `역할: 당신은 쇼핑몰 고객센터 담당자의 판단을 돕는 AI 코파일럿입니다.
 
@@ -22,9 +28,9 @@ const systemPrompt = `역할: 당신은 쇼핑몰 고객센터 담당자의 판�
 
 근거 및 안전 기준:
 - 입력에 없는 고객 정보, 재고, 배송 추적 결과, 증빙 확인 결과 또는 정책을 추측하거나 만들어내지 마세요.
-- policyReferences에는 실제 판단에 사용한 전달 정책의 policyId와 section만 포함하세요.
+- policyReferences에는 실제 판단에 사용한 전달 정책의 policyId와 section을 입력에 적힌 그대로 복사하고, 최대 ${AI_POLICY_REFERENCE_MAX_COUNT}개만 포함하세요.
+- 각 정책 근거의 reason은 한 문장, ${AI_POLICY_REASON_MAX_LENGTH}자 이내로 작성하세요.
 - 환불, 취소, 교환, 쿠폰 지급이 이미 승인되거나 실행된 것처럼 표현하지 마세요.
-- 외부 확인이나 담당자 승인이 필요하면 reviewRequired를 true로 설정하세요.
 
 recommendedAction 선택 기준:
 - REFUND_REVIEW: 정책상 환불 조건 검토
@@ -49,9 +55,9 @@ confidenceScore 기준:
 - 5점: 필요한 정책과 사실이 모두 있고 외부 확인이나 재량 판단 없이 정확한 정보 안내가 가능함
 
 출력 기준:
-- replyDraft는 바로 검토할 수 있는 정중한 한국어로 공백 포함 800자 이내로 작성하세요.
-- confidenceReason에는 해당 점수를 준 핵심 근거를 간결하게 설명하세요.
-- missingInformation에는 판단을 높이기 위해 실제로 필요한 정보만 넣고, 없으면 빈 배열을 반환하세요.
+- replyDraft는 바로 검토할 수 있는 정중한 한국어로 공백 포함 ${AI_REPLY_DRAFT_MAX_LENGTH}자 이내로 작성하세요.
+- confidenceReason에는 해당 점수를 준 핵심 근거를 한 문장, ${AI_CONFIDENCE_REASON_MAX_LENGTH}자 이내로 작성하세요.
+- missingInformation에는 판단을 높이기 위해 실제로 필요한 정보만 최대 ${AI_MISSING_INFORMATION_MAX_COUNT}개까지 짧게 넣고, 없으면 빈 배열을 반환하세요.
 - 정책 근거가 전혀 없으면 confidenceScore는 1점, recommendedAction은 ESCALATE로 설정하세요.
 - Structured Outputs 계약에 맞춰 confidenceScore는 "1", "2", "3", "4", "5" 중 하나의 문자열로 반환하세요.`;
 
@@ -112,54 +118,62 @@ class AiSuggestionError extends Error {
 export const parseAiSuggestionRequest = (value: unknown): AiSuggestionRequest =>
   aiSuggestionRequestSchema.parse(value);
 
-const validateAndNormalizeSuggestion = (
+const normalizePolicyRef = (value: string) =>
+  value.trim().replace(/\s+/g, " ").toLocaleLowerCase("ko-KR");
+
+export const validateSuggestion = (
   suggestion: AiSuggestion,
   suppliedPolicies: AiPolicyContext[]
 ) => {
-  const referencesAreValid = suggestion.policyReferences.every((reference) =>
-    suppliedPolicies.some(
-      (policy) => policy.policyId === reference.policyId && policy.section === reference.section
-    )
-  );
+  const policyReferences = suggestion.policyReferences
+    .flatMap((reference) => {
+      const suppliedPolicy = suppliedPolicies.find(
+        (policy) =>
+          normalizePolicyRef(policy.policyId) === normalizePolicyRef(reference.policyId) &&
+          normalizePolicyRef(policy.section) === normalizePolicyRef(reference.section)
+      );
 
-  if (!referencesAreValid) {
-    throw new AiSuggestionError(
-      "The AI referenced a policy that was not supplied.",
-      "INVALID_RESPONSE",
-      "INVALID_POLICY_REFERENCE"
+      return suppliedPolicy
+        ? [{ ...reference, policyId: suppliedPolicy.policyId, section: suppliedPolicy.section }]
+        : [];
+    })
+    .filter(
+      (reference, index, references) =>
+        references.findIndex(
+          (candidate) =>
+            candidate.policyId === reference.policyId && candidate.section === reference.section
+        ) === index
     );
-  }
 
-  const hasReferences = suggestion.policyReferences.length > 0;
+  const hasReferences = policyReferences.length > 0;
   const hasMissingInformation = suggestion.missingInformation.length > 0;
   const isInformationOnlyAction =
     suggestion.recommendedAction === "REFUND_STATUS_NOTICE" ||
     suggestion.recommendedAction === "RETURN_FEE_NOTICE" ||
     suggestion.recommendedAction === "MEMBERSHIP_GUIDE";
   const reviewRequired =
-    !hasReferences || hasMissingInformation || !isInformationOnlyAction || suggestion.reviewRequired;
+    !hasReferences || hasMissingInformation || !isInformationOnlyAction;
   const confidenceScore = !hasReferences
     ? 1
     : suggestion.recommendedAction === "ESCALATE"
-      ? Math.min(suggestion.confidenceScore, 2)
-      : hasMissingInformation
-        ? Math.min(suggestion.confidenceScore, 3)
-        : reviewRequired
-          ? Math.min(suggestion.confidenceScore, 4)
-          : suggestion.confidenceScore;
+    ? Math.min(suggestion.confidenceScore, 2)
+    : hasMissingInformation
+    ? Math.min(suggestion.confidenceScore, 3)
+    : reviewRequired
+    ? Math.min(suggestion.confidenceScore, 4)
+    : suggestion.confidenceScore;
   const shouldEscalate = !hasReferences || confidenceScore === 1;
 
   return {
     ...suggestion,
+    policyReferences,
     confidenceScore,
     recommendedAction: shouldEscalate ? "ESCALATE" : suggestion.recommendedAction,
     reviewRequired,
   } satisfies AiSuggestion;
 };
 
-export const requestAiSuggestion = async (
-  request: AiSuggestionRequest
-): Promise<AiSuggestion> => {
+export const requestAiSuggestion = async (request: AiSuggestionRequest): Promise<AiSuggestion> => {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     throw new AiSuggestionError(
@@ -174,16 +188,20 @@ export const requestAiSuggestion = async (
     timeout: 30_000,
     maxRetries: 2,
   });
+  const model = process.env.OPENAI_MODEL || DEFAULT_MODEL;
+  const startedAt = Date.now();
 
   try {
     const response = await openai.responses.parse({
-      model: process.env.OPENAI_MODEL || DEFAULT_MODEL,
+      model,
       store: false,
+      prompt_cache_key: PROMPT_CACHE_KEY,
       input: [
         { role: "system", content: systemPrompt },
         { role: "user", content: JSON.stringify(buildAiSuggestionContext(request)) },
       ],
       text: {
+        verbosity: "low",
         format: zodTextFormat(aiProviderSuggestionSchema, "cs_copilot_suggestion"),
       },
     });
@@ -197,7 +215,16 @@ export const requestAiSuggestion = async (
     }
 
     const suggestion = parseAiProviderSuggestion(response.output_parsed);
-    return validateAndNormalizeSuggestion(suggestion, request.policies);
+    console.info("[ai-suggestion] completed", {
+      durationMs: Date.now() - startedAt,
+      model,
+      serviceTier: response.service_tier,
+      inputTokens: response.usage?.input_tokens,
+      cachedInputTokens: response.usage?.input_tokens_details.cached_tokens,
+      outputTokens: response.usage?.output_tokens,
+      reasoningTokens: response.usage?.output_tokens_details.reasoning_tokens,
+    });
+    return validateSuggestion(suggestion, request.policies);
   } catch (error: unknown) {
     if (error instanceof AiSuggestionError) throw error;
     if (error instanceof ZodError) {

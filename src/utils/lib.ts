@@ -19,7 +19,7 @@ export type PolicySearchInput = {
 
 export const searchPolicies = (
   { title, inquiry, ticketCategory, orderStatus }: PolicySearchInput,
-  limit = 5
+  limit = 3
 ): PolicySearchResult[] => {
   const normalizedInquiry = normalize(`${title} ${inquiry}`);
   const inquiryTerms = [...new Set(tokenize(normalizedInquiry))];

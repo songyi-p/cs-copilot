@@ -165,8 +165,8 @@ export function AiAssistant({
         <section className="mb-5 rounded-[7px] border border-[#ecdcb7] bg-[#fffbf1] p-3.75">
           <div className="mb-2 text-[11px] font-extrabold text-[#8b641d]">추가 확인 정보</div>
           <ul className="m-0 space-y-1 pl-4 text-[11px] leading-[1.55] text-[#74664a]">
-            {suggestion.missingInformation.map((information) => (
-              <li key={information}>{information}</li>
+            {suggestion.missingInformation.map((information, index) => (
+              <li key={`${information}-${index}`}>{information}</li>
             ))}
           </ul>
         </section>
@@ -175,10 +175,10 @@ export function AiAssistant({
       <section className="border-t border-line pt-5 max-dashboard:max-w-162.5">
         <div className={sectionLabelClass}>정책 근거</div>
         {suggestion?.policyReferences.length ? (
-          suggestion.policyReferences.map((reference) => (
+          suggestion.policyReferences.map((reference, index) => (
             <div
               className="my-3.25 flex gap-2.5"
-              key={`${reference.policyId}-${reference.section}`}
+              key={`${reference.policyId}-${reference.section}-${index}`}
             >
               <span className="grid size-6.25 shrink-0 place-items-center rounded bg-[#f0edff] text-[#7968da]">
                 ▤
