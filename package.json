@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --import tsx --test src/utils/lib.test.ts src/server/ai-suggestion.test.ts"
+    "test": "node --import tsx --test src/utils/lib.test.ts src/utils/ticket-storage.test.ts src/server/ai-suggestion.test.ts"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.2",

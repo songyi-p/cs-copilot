@@ -19,6 +19,7 @@ import type {
 import { aiRecommendedActionLabel } from "@/utils/constants";
 import { useAiSuggestion } from "@/hooks/use-ai-suggestion";
 import { searchPolicies } from "@/utils/lib";
+import { mergeStoredTicketState, type StoredTicketState } from "@/utils/ticket-storage";
 import actionHistoryData from "@/data/action-history.json";
 import customersData from "@/data/customers.json";
 import ordersData from "@/data/orders.json";
@@ -118,17 +119,13 @@ export default function Home() {
     try {
       if (saved) setHistories(JSON.parse(saved) as ActionHistory[]);
       if (savedTickets) {
-        const parsedTickets = JSON.parse(savedTickets) as Ticket[];
+        const parsedTickets = JSON.parse(savedTickets) as StoredTicketState[];
         setTickets(
-          parsedTickets.map((ticket) => ({
-            ...ticket,
-            assigneeId:
-              ticket.assigneeId && agents.some((agent) => agent.agentId === ticket.assigneeId)
-                ? ticket.assigneeId
-                : ticket.ticketId === "TKT-1004"
-                  ? "agent-lee"
-                  : currentAgent.agentId,
-          }))
+          mergeStoredTicketState(
+            initialTickets,
+            parsedTickets,
+            agents.map((agent) => agent.agentId)
+          )
         );
       }
       if (savedDrafts) {
