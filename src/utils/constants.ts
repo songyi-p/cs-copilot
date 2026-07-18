@@ -52,6 +52,7 @@ export const aiRecommendedActionLabel: Record<AiRecommendedAction, string> = {
   ADDRESS_CHANGE_CHECK: "배송지 변경 가능 여부 확인",
   DELIVERY_TRACE: "배송 위치 및 인계 상태 확인",
   REFUND_STATUS_NOTICE: "환불 반영 기간 안내",
+  RETURN_FEE_NOTICE: "반품·교환 배송비 기준 안내",
   MEMBERSHIP_GUIDE: "회원 등급 혜택 안내",
   ESCALATE: "담당자 이관 권장",
 };

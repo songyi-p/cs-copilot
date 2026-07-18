@@ -36,6 +36,7 @@ recommendedAction 선택 기준:
 - ADDRESS_CHANGE_CHECK: 배송지 변경 가능 여부 확인
 - DELIVERY_TRACE: 배송 지연·완료 미수령에 대한 택배사 추적 확인
 - REFUND_STATUS_NOTICE: 환불 반영 기간 안내
+- RETURN_FEE_NOTICE: 반품 또는 교환 배송비 기준 안내
 - MEMBERSHIP_GUIDE: 회원 등급 혜택 안내
 - ESCALATE: 적용 정책이 없거나 상충해 담당자 판단 없이는 안전한 다음 단계를 정할 수 없음
 
@@ -123,6 +124,7 @@ const validateAndNormalizeSuggestion = (
   const hasMissingInformation = suggestion.missingInformation.length > 0;
   const isInformationOnlyAction =
     suggestion.recommendedAction === "REFUND_STATUS_NOTICE" ||
+    suggestion.recommendedAction === "RETURN_FEE_NOTICE" ||
     suggestion.recommendedAction === "MEMBERSHIP_GUIDE";
   const reviewRequired =
     !hasReferences || hasMissingInformation || !isInformationOnlyAction || suggestion.reviewRequired;

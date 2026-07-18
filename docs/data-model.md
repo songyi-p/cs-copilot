@@ -23,7 +23,7 @@ Policy   (1) ─── PolicyReference (0..N)
 | ------------- | ------------ | -------------------------------------------- |
 | Customer      | `customerId` | 이름, 등급, 최근 CS 이력                     |
 | Order         | `orderId`    | 고객, 상품, 주문/배송 상태, 예정일, 결제금액 |
-| Ticket        | `ticketId`   | 고객/주문, 문의, 분류, 처리 상태             |
+| Ticket        | `ticketId`   | 고객/주문, 문의 제목·내용, 분류, 처리 상태   |
 | Policy        | `policyId`   | Markdown 문서의 frontmatter 및 섹션          |
 | PolicyReference | `referenceId` | 티켓, 정책, 인용 섹션, 참조 이유           |
 | ActionHistory | `historyId`  | AI 제안, 신뢰도, 담당자 수정, 승인 결과, 정책 근거 |
@@ -32,9 +32,9 @@ Policy   (1) ─── PolicyReference (0..N)
 
 - 주문: `PAID`, `PREPARING`, `IN_TRANSIT`, `DELIVERED`, `CANCELLED`, `REFUNDED`
 - 문의: `OPEN`, `IN_REVIEW`, `RESOLVED`, `ESCALATED`
-- AI 권장 처리: `REFUND_REVIEW`, `DELAY_COUPON`, `EXCHANGE_REVIEW`, `ESCALATE`
+- AI 권장 처리: 환불·쿠폰·교환·반품·불량 증빙·취소·주문 변경·배송지 변경·배송 추적·환불/반품비 안내·회원 혜택·이관
 - AI 제안 결과: `ADOPTED`, `EDITED`, `REJECTED`
-- AI 신뢰도: `high`, `medium`, `low`
+- AI 신뢰도: 1~5점 정수
 
 ## AI 제안 계약
 
@@ -48,15 +48,35 @@ type AiSuggestion = {
     section: string;
     reason: string;
   }[];
-  recommendedAction: "REFUND_REVIEW" | "DELAY_COUPON" | "ESCALATE";
-  confidence: "high" | "medium" | "low";
+  recommendedAction: AiRecommendedAction;
+  confidenceScore: 1 | 2 | 3 | 4 | 5;
+  confidenceReason: string;
+  missingInformation: string[];
+  reviewRequired: boolean;
 };
 ```
 
-`policyReferences`는 검색되어 모델에 전달된 정책만 참조할 수 있다. `confidence`가 `low`이면
-자동 권장 처리안 대신 담당자 이관을 권장하지만, 모델이 반환한 원본 처리 코드는 처리 이력에
-보존한다.
+`policyReferences`는 검색되어 모델에 전달된 정책만 참조할 수 있다. 서버는 정책 근거가 없는
+응답을 1점과 `ESCALATE`로 보정하고, 누락 정보가 있는 응답은 최대 3점, 담당자 승인 또는 외부
+확인이 필요한 응답은 최대 4점으로 제한한다.
+
+신뢰도 기준은 다음과 같다.
+
+| 점수 | 기준 |
+| --- | --- |
+| 1점 | 적용 정책이 없거나 상충하고 핵심 사실도 부족함 |
+| 2점 | 관련 정책은 있으나 핵심 사실이 부족해 담당자 판단이 필요함 |
+| 3점 | 다음 단계는 식별했지만 사진·재고·택배사·출고 여부 확인이 필요함 |
+| 4점 | 정책과 주문 사실이 처리안을 뒷받침하지만 실제 승인 또는 실행이 필요함 |
+| 5점 | 외부 확인이나 재량 판단 없이 정확한 정보 안내가 가능함 |
+
+## AI 평가셋
+
+`src/data/ai-evaluation-cases.json`은 20개 티켓에 대한 기대 정책 섹션, 권장 처리안, 허용 신뢰도
+범위를 저장한다. 자동 테스트는 정책 검색 상위 3개 재현율과 서버 날짜 계산 및 LLM 전달 데이터
+허용 목록을 검증한다. 모델별 처리안·점수 정확도는 동일 평가셋을 사용해 비교한다.
 
 ## 첫 번째 데모 흐름
 
-`TKT-1008`은 `ORD-202607-1008`과 연결된다. 배송 예정일이 지났지만 주문은 배송 중이며, `PolicyReference`를 통해 `POL-DELIVERY-001`과 `POL-REFUND-001`의 근거 섹션을 찾아 배송 지연 쿠폰과 환불 검토 조건을 제안한다.
+`TKT-1008`은 `ORD-202607-1008`과 연결된다. 서버는 기준일과 배송 예정일의 차이를 8일로 계산하고,
+`POL-DELIVERY-001`과 `POL-REFUND-001`의 근거 섹션을 찾아 배송 추적과 환불 검토 조건을 제안한다.

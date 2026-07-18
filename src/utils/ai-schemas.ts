@@ -11,6 +11,7 @@ export const aiRecommendedActionSchema = z.enum([
   "ADDRESS_CHANGE_CHECK",
   "DELIVERY_TRACE",
   "REFUND_STATUS_NOTICE",
+  "RETURN_FEE_NOTICE",
   "MEMBERSHIP_GUIDE",
   "ESCALATE",
 ]);
