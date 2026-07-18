@@ -6,7 +6,9 @@
     "category": "DELIVERY",
     "section": "배송 예정일",
     "content": "배송 예정일은 영업일 기준 예상 도착일이며, 택배사 사정이나 기상 악화에 따라 1~2일 차이가 발생할 수 있습니다.",
-    "keywords": ["배송 예정일", "예상 도착일", "언제 받을", "언제 도착", "택배"]
+    "keywords": ["배송 예정일", "예상 도착일", "언제 받을", "도착 예정", "배송 조회"],
+    "ticketCategories": ["DELIVERY_DELAY"],
+    "orderStatuses": ["IN_TRANSIT"]
   },
   {
     "sectionId": "POL-DELIVERY-001-DELAY",
@@ -15,7 +17,9 @@
     "category": "DELIVERY",
     "section": "배송 지연",
     "content": "예정일보다 2일 이상 늦고 주문 상태가 IN_TRANSIT인 경우, 담당자는 사과 답변과 함께 3,000원 쿠폰 발급을 제안할 수 있습니다. 분실 또는 배송 정보 미갱신이 의심되면 택배사 확인을 위해 담당자 이관을 제안합니다.",
-    "keywords": ["배송 지연", "배송이 늦", "배송 예정일이 지났", "못 받았", "아직 안 왔", "조회가 멈", "분실"]
+    "keywords": ["배송 지연", "배송이 늦", "예정일이 지났", "아직 받지 못", "조회가 멈", "갱신되지", "분실"],
+    "ticketCategories": ["DELIVERY_DELAY"],
+    "orderStatuses": ["IN_TRANSIT"]
   },
   {
     "sectionId": "POL-DELIVERY-001-ADDRESS",
@@ -23,8 +27,21 @@
     "policyTitle": "배송 및 배송 지연 정책",
     "category": "DELIVERY",
     "section": "배송지 변경",
-    "content": "상품이 출고되어 배송 중인 경우 배송지 변경은 보장할 수 없습니다. 담당자가 택배사 가능 여부를 확인한 뒤 안내합니다.",
-    "keywords": ["배송지 변경", "주소 변경", "배송 주소", "주소를 바꿀"]
+    "content": "주문 상태가 PAID 또는 PREPARING이면 담당자가 출고 여부를 확인한 뒤 배송지 변경을 접수할 수 있습니다. 배송 중인 경우 변경을 보장할 수 없으며 택배사 가능 여부를 확인합니다.",
+    "keywords": ["배송지 변경", "주소 변경", "배송 주소", "새 주소", "수령 주소"],
+    "ticketCategories": ["DELIVERY_ADDRESS"],
+    "orderStatuses": ["PAID", "PREPARING", "IN_TRANSIT"]
+  },
+  {
+    "sectionId": "POL-DELIVERY-001-MISSING",
+    "policyId": "POL-DELIVERY-001",
+    "policyTitle": "배송 및 배송 지연 정책",
+    "category": "DELIVERY",
+    "section": "배송 완료 미수령",
+    "content": "배송 완료로 표시되지만 고객이 상품을 받지 못한 경우 현관, 경비실, 무인 보관함을 확인합니다. 이후에도 찾지 못하면 담당자가 택배사 인계 위치를 확인하며 분실 확인 전 자동 환불하지 않습니다.",
+    "keywords": ["배송 완료", "받지 못", "경비실", "현관", "상품이 없습니다", "미수령"],
+    "ticketCategories": ["DELIVERY_MISSING"],
+    "orderStatuses": ["DELIVERED"]
   },
   {
     "sectionId": "POL-REFUND-001-BEFORE-SHIPPING",
@@ -33,7 +50,9 @@
     "category": "REFUND",
     "section": "배송 전 취소",
     "content": "출고 전 주문은 즉시 취소 요청을 접수할 수 있습니다.",
-    "keywords": ["배송 전 취소", "출고 전", "주문 취소", "결제 취소"]
+    "keywords": ["배송 전 취소", "출고 전", "주문 취소", "취소 접수"],
+    "ticketCategories": ["CANCELLATION"],
+    "orderStatuses": ["PAID", "PREPARING"]
   },
   {
     "sectionId": "POL-REFUND-001-DELAY",
@@ -42,7 +61,9 @@
     "category": "REFUND",
     "section": "배송 지연 환불",
     "content": "배송 예정일이 5일 이상 지났거나 분실이 확인된 경우 환불을 검토합니다. 배송 중인 주문은 택배사 확인 전 자동 환불하지 않으며 담당자 승인이 필요합니다.",
-    "keywords": ["배송 지연 환불", "못 받았", "아직 안 왔", "환불 가능", "분실"]
+    "keywords": ["배송 지연 환불", "받지 못", "환불 가능", "환불 요청", "분실", "필요하지 않"],
+    "ticketCategories": ["DELIVERY_DELAY", "DELIVERY_MISSING"],
+    "orderStatuses": ["IN_TRANSIT", "DELIVERED"]
   },
   {
     "sectionId": "POL-REFUND-001-PERIOD",
@@ -51,7 +72,9 @@
     "category": "REFUND",
     "section": "환불 처리 기간",
     "content": "환불 승인 후 결제수단에 따라 3~5영업일 안에 환불됩니다.",
-    "keywords": ["환불 처리 기간", "환불 언제", "환불이 언제", "결제 수단으로 들어", "환불 현황"]
+    "keywords": ["환불 처리 기간", "환불 완료", "승인 취소", "카드사", "환불 반영"],
+    "ticketCategories": ["REFUND_STATUS"],
+    "orderStatuses": ["REFUNDED"]
   },
   {
     "sectionId": "POL-RETURN-001-PERIOD",
@@ -59,8 +82,10 @@
     "policyTitle": "반품 및 교환 정책",
     "category": "RETURN",
     "section": "신청 가능 기간",
-    "content": "상품 수령일로부터 7일 안에 반품 또는 교환을 신청할 수 있습니다.",
-    "keywords": ["반품 가능", "교환 가능", "반품하고", "교환하고", "언제까지", "7일"]
+    "content": "상품 수령일로부터 7일 안에 반품 또는 교환을 신청할 수 있습니다. 기간이 지난 경우 자동 접수하지 않으며 예외 사유를 담당자가 확인합니다.",
+    "keywords": ["반품 가능", "교환 가능", "수령 후", "7일", "14일", "신청 기간"],
+    "ticketCategories": ["RETURN", "EXCHANGE"],
+    "orderStatuses": ["DELIVERED"]
   },
   {
     "sectionId": "POL-RETURN-001-FEE",
@@ -69,7 +94,9 @@
     "category": "RETURN",
     "section": "반품 배송비",
     "content": "단순 변심 반품은 왕복 배송비 6,000원을 차감합니다. 오배송·불량·상품 정보 상이의 경우 배송비를 차감하지 않습니다.",
-    "keywords": ["반품 배송비", "반품비", "배송비가 왜", "배송비 차감", "단순 변심", "화면에서 본 것과 달"]
+    "keywords": ["반품 배송비", "왕복 배송비", "배송비 차감", "단순 변심", "상품 정보 상이", "색상이 다"],
+    "ticketCategories": ["RETURN", "RETURN_FEE", "WRONG_ITEM", "DEFECT"],
+    "orderStatuses": ["DELIVERED", "REFUNDED"]
   },
   {
     "sectionId": "POL-RETURN-001-EXCHANGE",
@@ -77,8 +104,10 @@
     "policyTitle": "반품 및 교환 정책",
     "category": "RETURN",
     "section": "교환",
-    "content": "동일 상품의 색상 또는 사이즈 교환은 재고가 있을 때 가능합니다.",
-    "keywords": ["사이즈 교환", "색상 교환", "사이즈가 작", "사이즈가 크", "색상 변경", "색상을 변경", "교환"]
+    "content": "동일 상품의 색상 또는 사이즈 교환은 재고가 있을 때 가능합니다. 단순 변심 교환은 왕복 배송비 6,000원이 부과되며 미사용 상태로 택과 구성품이 보존되어야 합니다.",
+    "keywords": ["사이즈 교환", "색상 교환", "크게 교환", "다른 색상", "재고", "택"],
+    "ticketCategories": ["EXCHANGE"],
+    "orderStatuses": ["DELIVERED"]
   },
   {
     "sectionId": "POL-DEFECT-001-EVIDENCE",
@@ -86,8 +115,10 @@
     "policyTitle": "불량 및 오배송 정책",
     "category": "DEFECT",
     "section": "증빙 확인",
-    "content": "불량 또는 오배송 문의는 상품 상태가 보이는 사진을 요청합니다.",
-    "keywords": ["불량", "오배송", "파손", "올이 풀", "하자", "사진"]
+    "content": "불량 문의는 상품 전체와 하자 부위 사진을 요청합니다. 오배송 문의는 주문 내역과 실제 수령 상품을 함께 확인할 수 있는 사진을 요청합니다.",
+    "keywords": ["불량", "오배송", "파손", "올이", "하자", "사진", "다른 상품"],
+    "ticketCategories": ["DEFECT", "WRONG_ITEM"],
+    "orderStatuses": ["DELIVERED"]
   },
   {
     "sectionId": "POL-DEFECT-001-ACTION",
@@ -95,8 +126,10 @@
     "policyTitle": "불량 및 오배송 정책",
     "category": "DEFECT",
     "section": "처리",
-    "content": "증빙 확인 후 교환 또는 환불을 제안하며, 반품 배송비는 차감하지 않습니다. 재고가 없는 경우 환불을 우선 제안합니다.",
-    "keywords": ["불량 교환", "불량 환불", "오배송 교환", "불량", "오배송", "올이 풀", "재고가 없"]
+    "content": "증빙 확인 후 교환 또는 환불을 제안하며 반품 배송비는 차감하지 않습니다. 재고가 없는 경우 환불을 우선 제안합니다. 사용 후 파손은 사진과 사용 기간을 확인해 초기 불량 여부를 검토합니다.",
+    "keywords": ["불량 교환", "불량 환불", "오배송 교환", "교환 절차", "파손", "재고가 없"],
+    "ticketCategories": ["DEFECT", "WRONG_ITEM"],
+    "orderStatuses": ["DELIVERED"]
   },
   {
     "sectionId": "POL-COUPON-001-DELAY",
@@ -105,6 +138,85 @@
     "category": "COMPENSATION",
     "section": "배송 지연 쿠폰",
     "content": "배송 예정일보다 2일 이상 지연된 주문에 대해 담당자는 3,000원 쿠폰 1장을 발급할 수 있습니다.",
-    "keywords": ["배송 지연", "배송이 늦", "배송 예정일이 지났", "쿠폰", "보상"]
+    "keywords": ["배송 지연", "예정일이 지났", "쿠폰", "보상", "하루 지연"],
+    "ticketCategories": ["DELIVERY_DELAY"],
+    "orderStatuses": ["IN_TRANSIT"]
+  },
+  {
+    "sectionId": "POL-COUPON-001-APPROVAL",
+    "policyId": "POL-COUPON-001",
+    "policyTitle": "고객 보상 쿠폰 정책",
+    "category": "COMPENSATION",
+    "section": "승인 원칙",
+    "content": "쿠폰 발급은 AI가 제안할 수 있지만 실제 발급은 담당자가 검토하고 승인한 뒤에만 처리합니다.",
+    "keywords": ["쿠폰 발급", "지연 보상", "보상 가능"],
+    "ticketCategories": ["DELIVERY_DELAY"],
+    "orderStatuses": ["IN_TRANSIT"]
+  },
+  {
+    "sectionId": "POL-ORDER-001-CANCEL",
+    "policyId": "POL-ORDER-001",
+    "policyTitle": "주문 변경 및 취소 정책",
+    "category": "ORDER",
+    "section": "출고 전 주문 취소",
+    "content": "주문 상태가 PAID 또는 PREPARING이면 출고 전 취소를 요청할 수 있습니다. PREPARING 상태는 담당자가 취소 가능 여부를 확인한 뒤 접수합니다.",
+    "keywords": ["주문 취소", "출고 전", "취소 요청", "더 이상 필요", "상품 준비 중"],
+    "ticketCategories": ["CANCELLATION", "ORDER_CHANGE"],
+    "orderStatuses": ["PAID", "PREPARING"]
+  },
+  {
+    "sectionId": "POL-ORDER-001-OPTION",
+    "policyId": "POL-ORDER-001",
+    "policyTitle": "주문 변경 및 취소 정책",
+    "category": "ORDER",
+    "section": "옵션 및 수량 변경",
+    "content": "결제 완료 후 상품의 색상, 사이즈 또는 수량을 기존 주문에서 직접 변경할 수 없습니다. 출고 전이면 취소 가능 여부를 확인한 뒤 원하는 옵션으로 다시 주문하도록 안내합니다.",
+    "keywords": ["옵션 변경", "색상 변경", "사이즈 변경", "수량 변경", "한 장 추가", "다시 주문"],
+    "ticketCategories": ["ORDER_CHANGE"],
+    "orderStatuses": ["PAID", "PREPARING"]
+  },
+  {
+    "sectionId": "POL-ORDER-001-COMBINE",
+    "policyId": "POL-ORDER-001",
+    "policyTitle": "주문 변경 및 취소 정책",
+    "category": "ORDER",
+    "section": "합배송",
+    "content": "별도로 결제한 주문의 합배송이나 배송비 조정은 보장하지 않습니다. 출고 전 주문은 담당자가 물류 처리 가능 여부를 확인할 수 있습니다.",
+    "keywords": ["합배송", "배송비 조정", "별도 주문", "추가 주문"],
+    "ticketCategories": ["ORDER_CHANGE"],
+    "orderStatuses": ["PAID", "PREPARING"]
+  },
+  {
+    "sectionId": "POL-MEMBERSHIP-001-SILVER",
+    "policyId": "POL-MEMBERSHIP-001",
+    "policyTitle": "회원 등급 혜택 정책",
+    "category": "MEMBERSHIP",
+    "section": "실버 등급 혜택",
+    "content": "실버 회원에게는 매월 1일 3,000원 할인 쿠폰 1장이 발급됩니다. 쿠폰은 30,000원 이상 구매 시 사용할 수 있고 발급월 말일까지 유효합니다.",
+    "keywords": ["실버 등급", "실버 회원", "회원 혜택", "정기 쿠폰", "할인 쿠폰"],
+    "ticketCategories": ["MEMBERSHIP"],
+    "orderStatuses": []
+  },
+  {
+    "sectionId": "POL-MEMBERSHIP-001-REWARD",
+    "policyId": "POL-MEMBERSHIP-001",
+    "policyTitle": "회원 등급 혜택 정책",
+    "category": "MEMBERSHIP",
+    "section": "배송 및 적립 혜택",
+    "content": "실버 등급에는 상시 무료 배송 혜택이 제공되지 않습니다. 구매 금액의 1%가 배송 완료 7일 후 적립되며 반품 또는 취소한 상품은 제외됩니다.",
+    "keywords": ["무료 배송", "적립 혜택", "적립금", "배송 혜택"],
+    "ticketCategories": ["MEMBERSHIP"],
+    "orderStatuses": []
+  },
+  {
+    "sectionId": "POL-MEMBERSHIP-001-REFLECTION",
+    "policyId": "POL-MEMBERSHIP-001",
+    "policyTitle": "회원 등급 혜택 정책",
+    "category": "MEMBERSHIP",
+    "section": "등급 반영",
+    "content": "회원 등급 변경은 매월 1일 반영됩니다. 등급 변경 후 쿠폰이 보이지 않으면 앱을 다시 실행한 뒤 쿠폰함을 확인하고 계속 확인되지 않으면 담당자에게 이관합니다.",
+    "keywords": ["등급 변경", "쿠폰이 보이지", "쿠폰함", "발급 시점"],
+    "ticketCategories": ["MEMBERSHIP"],
+    "orderStatuses": []
   }
 ]

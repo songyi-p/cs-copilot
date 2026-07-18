@@ -14,6 +14,7 @@ export type Ticket = {
   ticketId: string;
   customerId: string;
   orderId: string | null;
+  title: string;
   inquiry: string;
   category: string;
   status: string;
@@ -54,10 +55,13 @@ export type PolicySearchItem = {
   section: string;
   content: string;
   keywords: string[];
+  ticketCategories: string[];
+  orderStatuses: string[];
 };
 
 export type PolicySearchResult = PolicySearchItem & {
   matchedKeywords: string[];
+  matchedTerms: string[];
   score: number;
 };
 

@@ -14,7 +14,9 @@ export const categoryLabel: Record<string, string> = {
   RETURN_FEE: "반품비",
   DEFECT: "불량",
   CANCELLATION: "주문 취소",
-  ACCOUNT: "계정",
+  MEMBERSHIP: "회원 혜택",
+  WRONG_ITEM: "오배송",
+  DELIVERY_MISSING: "배송 완료 미수령",
 };
 
 export const statusLabel: Record<string, string> = {

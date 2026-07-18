@@ -54,7 +54,16 @@ export default function Home() {
   );
   const customer = customers.find((item) => item.customerId === selected.customerId)!;
   const order = orders.find((item) => item.orderId === selected.orderId);
-  const policyResults = useMemo(() => searchPolicies(selected.inquiry), [selected.inquiry]);
+  const policyResults = useMemo(
+    () =>
+      searchPolicies({
+        title: selected.title,
+        inquiry: selected.inquiry,
+        ticketCategory: selected.category,
+        orderStatus: order?.orderStatus,
+      }),
+    [order?.orderStatus, selected.category, selected.inquiry, selected.title]
+  );
   const ticketHistories = histories
     .filter((item) => item.ticketId === selected.ticketId)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
