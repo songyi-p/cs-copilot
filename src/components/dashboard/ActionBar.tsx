@@ -9,6 +9,8 @@ export function ActionBar({
   onApprove,
   isResolved,
   canEdit,
+  canSaveDraft,
+  canApprove,
   transferTargets,
 }: {
   onSaveDraft: () => void;
@@ -16,6 +18,8 @@ export function ActionBar({
   onApprove: () => void;
   isResolved: boolean;
   canEdit: boolean;
+  canSaveDraft: boolean;
+  canApprove: boolean;
   transferTargets: Agent[];
 }) {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -33,7 +37,7 @@ export function ActionBar({
           <button
             className="rounded-md border border-[#dbe1e9] bg-white px-3.75 py-2.5 text-xs font-bold text-[#536173] max-mobile:px-2.5 max-mobile:py-2"
             onClick={onSaveDraft}
-            disabled={!canEdit || isResolved}
+            disabled={!canEdit || !canSaveDraft || isResolved}
           >
             임시 저장
           </button>
@@ -47,7 +51,7 @@ export function ActionBar({
           <button
             className="rounded-md border border-action-primary bg-action-primary py-2.5 pr-3.75 pl-4.5 text-xs font-bold text-white disabled:cursor-not-allowed disabled:border-[#aab3c5] disabled:bg-[#aab3c5] max-mobile:px-2.5 max-mobile:py-2"
             onClick={() => setIsConfirmOpen(true)}
-            disabled={!canEdit || isResolved}
+            disabled={!canEdit || !canApprove || isResolved}
           >
             {isResolved ? "처리 완료" : "답변 승인"}{" "}
             <span className="ml-2 text-base leading-none">→</span>
