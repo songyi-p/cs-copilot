@@ -2,6 +2,7 @@ import type { PolicySearchItem, PolicySearchResult } from "@/utils/types";
 import policySearchIndex from "@/data/policy-search-index.json";
 
 const normalize = (value: string) => value.toLowerCase().replace(/\s+/g, " ").trim();
+const MIN_POLICY_SCORE = 20;
 
 const tokenize = (value: string) =>
   normalize(value)
@@ -44,7 +45,7 @@ export const searchPolicies = (
 
       return { ...item, matchedKeywords, matchedTerms, score };
     })
-    .filter((item) => item.score > 0)
+    .filter((item) => item.score >= MIN_POLICY_SCORE)
     .sort(
       (a, b) =>
         b.score - a.score ||

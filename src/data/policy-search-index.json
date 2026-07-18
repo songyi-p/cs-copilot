@@ -95,7 +95,7 @@
     "section": "반품 배송비",
     "content": "단순 변심 반품은 왕복 배송비 6,000원을 차감합니다. 오배송·불량·상품 정보 상이의 경우 배송비를 차감하지 않습니다.",
     "keywords": ["반품 배송비", "왕복 배송비", "배송비 차감", "단순 변심", "상품 정보 상이", "색상이 다"],
-    "ticketCategories": ["RETURN", "RETURN_FEE", "WRONG_ITEM", "DEFECT"],
+    "ticketCategories": ["RETURN", "EXCHANGE", "RETURN_FEE", "WRONG_ITEM", "DEFECT"],
     "orderStatuses": ["DELIVERED", "REFUNDED"]
   },
   {

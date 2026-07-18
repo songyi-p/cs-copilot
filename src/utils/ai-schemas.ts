@@ -38,6 +38,34 @@ export const aiSuggestionSchema = z
   })
   .strict();
 
+const aiProviderPolicyReferenceSchema = z
+  .object({
+    policyId: z.string(),
+    section: z.string(),
+    reason: z.string(),
+  })
+  .strict();
+
+export const aiProviderSuggestionSchema = z
+  .object({
+    replyDraft: z.string(),
+    policyReferences: z.array(aiProviderPolicyReferenceSchema),
+    recommendedAction: aiRecommendedActionSchema,
+    confidenceScore: z.enum(["1", "2", "3", "4", "5"]),
+    confidenceReason: z.string(),
+    missingInformation: z.array(z.string()),
+    reviewRequired: z.boolean(),
+  })
+  .strict();
+
+export const parseAiProviderSuggestion = (value: unknown): AiSuggestion => {
+  const providerSuggestion = aiProviderSuggestionSchema.parse(value);
+  return aiSuggestionSchema.parse({
+    ...providerSuggestion,
+    confidenceScore: Number(providerSuggestion.confidenceScore),
+  });
+};
+
 export const aiOrderContextSchema = z
   .object({
     orderId: z.string().trim().min(1).max(100),
@@ -81,6 +109,7 @@ export type AiRecommendedAction = z.infer<typeof aiRecommendedActionSchema>;
 export type AiConfidenceScore = z.infer<typeof aiConfidenceScoreSchema>;
 export type AiPolicyReference = z.infer<typeof aiPolicyReferenceSchema>;
 export type AiSuggestion = z.infer<typeof aiSuggestionSchema>;
+export type AiProviderSuggestion = z.infer<typeof aiProviderSuggestionSchema>;
 export type AiOrderContext = z.infer<typeof aiOrderContextSchema>;
 export type AiOrderFacts = z.infer<typeof aiOrderFactsSchema>;
 export type AiPolicyContext = z.infer<typeof aiPolicyContextSchema>;

@@ -2,8 +2,9 @@ import OpenAI from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 import { ZodError } from "zod";
 import {
+  aiProviderSuggestionSchema,
   aiSuggestionRequestSchema,
-  aiSuggestionSchema,
+  parseAiProviderSuggestion,
   type AiOrderContext,
   type AiOrderFacts,
   type AiPolicyContext,
@@ -51,7 +52,8 @@ confidenceScore 기준:
 - replyDraft는 바로 검토할 수 있는 정중한 한국어로 공백 포함 800자 이내로 작성하세요.
 - confidenceReason에는 해당 점수를 준 핵심 근거를 간결하게 설명하세요.
 - missingInformation에는 판단을 높이기 위해 실제로 필요한 정보만 넣고, 없으면 빈 배열을 반환하세요.
-- 정책 근거가 전혀 없으면 confidenceScore는 1점, recommendedAction은 ESCALATE로 설정하세요.`;
+- 정책 근거가 전혀 없으면 confidenceScore는 1점, recommendedAction은 ESCALATE로 설정하세요.
+- Structured Outputs 계약에 맞춰 confidenceScore는 "1", "2", "3", "4", "5" 중 하나의 문자열로 반환하세요.`;
 
 const MS_PER_DAY = 24 * 60 * 60 * 1_000;
 
@@ -94,7 +96,14 @@ export const buildAiSuggestionContext = (
 class AiSuggestionError extends Error {
   constructor(
     message: string,
-    readonly code: "CONFIGURATION" | "PROVIDER" | "INVALID_RESPONSE"
+    readonly code: "CONFIGURATION" | "PROVIDER" | "INVALID_RESPONSE",
+    readonly reason:
+      | "MISSING_API_KEY"
+      | "PROVIDER_REQUEST"
+      | "EMPTY_OUTPUT"
+      | "SCHEMA_VALIDATION"
+      | "INVALID_POLICY_REFERENCE",
+    readonly upstreamStatus?: number
   ) {
     super(message);
   }
@@ -116,7 +125,8 @@ const validateAndNormalizeSuggestion = (
   if (!referencesAreValid) {
     throw new AiSuggestionError(
       "The AI referenced a policy that was not supplied.",
-      "INVALID_RESPONSE"
+      "INVALID_RESPONSE",
+      "INVALID_POLICY_REFERENCE"
     );
   }
 
@@ -152,7 +162,11 @@ export const requestAiSuggestion = async (
 ): Promise<AiSuggestion> => {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new AiSuggestionError("OPENAI_API_KEY is not configured.", "CONFIGURATION");
+    throw new AiSuggestionError(
+      "OPENAI_API_KEY is not configured.",
+      "CONFIGURATION",
+      "MISSING_API_KEY"
+    );
   }
 
   const openai = new OpenAI({
@@ -170,23 +184,38 @@ export const requestAiSuggestion = async (
         { role: "user", content: JSON.stringify(buildAiSuggestionContext(request)) },
       ],
       text: {
-        format: zodTextFormat(aiSuggestionSchema, "cs_copilot_suggestion"),
+        format: zodTextFormat(aiProviderSuggestionSchema, "cs_copilot_suggestion"),
       },
     });
 
     if (!response.output_parsed) {
-      throw new AiSuggestionError("The AI returned no parsed output.", "INVALID_RESPONSE");
+      throw new AiSuggestionError(
+        "The AI returned no parsed output.",
+        "INVALID_RESPONSE",
+        "EMPTY_OUTPUT"
+      );
     }
 
-    return validateAndNormalizeSuggestion(response.output_parsed, request.policies);
+    const suggestion = parseAiProviderSuggestion(response.output_parsed);
+    return validateAndNormalizeSuggestion(suggestion, request.policies);
   } catch (error: unknown) {
     if (error instanceof AiSuggestionError) throw error;
     if (error instanceof ZodError) {
-      throw new AiSuggestionError("The AI response failed schema validation.", "INVALID_RESPONSE");
+      throw new AiSuggestionError(
+        "The AI response failed schema validation.",
+        "INVALID_RESPONSE",
+        "SCHEMA_VALIDATION"
+      );
     }
+    const upstreamStatus =
+      typeof error === "object" && error !== null && "status" in error
+        ? Number(error.status) || undefined
+        : undefined;
     throw new AiSuggestionError(
       error instanceof Error ? error.message : "The AI request failed.",
-      "PROVIDER"
+      "PROVIDER",
+      "PROVIDER_REQUEST",
+      upstreamStatus
     );
   }
 };
@@ -195,4 +224,16 @@ export const getAiErrorStatus = (error: unknown) => {
   if (error instanceof AiSuggestionError && error.code === "CONFIGURATION") return 503;
   if (error instanceof AiSuggestionError) return 502;
   return 500;
+};
+
+export const getAiErrorDiagnostics = (error: unknown) => {
+  if (error instanceof AiSuggestionError) {
+    return {
+      code: error.code,
+      reason: error.reason,
+      upstreamStatus: error.upstreamStatus,
+    };
+  }
+
+  return { code: "UNKNOWN", reason: "UNEXPECTED_ERROR" };
 };

@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { zodTextFormat } from "openai/helpers/zod";
 import { buildAiSuggestionContext, deriveOrderFacts } from "@/server/ai-suggestion";
+import {
+  aiProviderSuggestionSchema,
+  parseAiProviderSuggestion,
+} from "@/utils/ai-schemas";
 import type { AiSuggestionRequest } from "@/utils/types";
 
 const delayedOrder = {
@@ -52,4 +57,40 @@ test("모델 입력에는 허용된 문의·주문·정책과 서버 파생값�
   assert.equal(context.order?.daysPastDeliveryExpected, 8);
   assert.equal(context.inquiry.title, request.inquiryTitle);
   assert.deepEqual(context.policies, request.policies);
+});
+
+test("공급자용 Structured Outputs 스키마는 제한 키워드를 포함하지 않는다", () => {
+  const format = zodTextFormat(aiProviderSuggestionSchema, "cs_copilot_suggestion");
+  const serializedSchema = JSON.stringify(format.schema);
+
+  for (const keyword of [
+    '"minimum"',
+    '"maximum"',
+    '"minLength"',
+    '"maxLength"',
+    '"minItems"',
+    '"maxItems"',
+  ]) {
+    assert.equal(serializedSchema.includes(keyword), false, keyword);
+  }
+});
+
+test("공급자의 문자열 점수를 검증된 숫자 점수로 변환한다", () => {
+  const suggestion = parseAiProviderSuggestion({
+    replyDraft: "정책을 확인한 뒤 교환을 도와드리겠습니다.",
+    policyReferences: [
+      {
+        policyId: "POL-RETURN-001",
+        section: "교환",
+        reason: "교환 재고 확인 조건",
+      },
+    ],
+    recommendedAction: "EXCHANGE_REVIEW",
+    confidenceScore: "3",
+    confidenceReason: "재고 확인이 필요합니다.",
+    missingInformation: ["교환 희망 사이즈 재고"],
+    reviewRequired: true,
+  });
+
+  assert.equal(suggestion.confidenceScore, 3);
 });
