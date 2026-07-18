@@ -73,7 +73,9 @@ export default function Home() {
     selected.status === "RESOLVED" || selected.status === "ESCALATED";
   const suggestionRequest = useMemo<AiSuggestionRequest>(
     () => ({
-      inquiry: selected.inquiry,
+      inquiryTitle: selected.title,
+      inquiryContent: selected.inquiry,
+      ticketCategory: selected.category,
       order: order
         ? {
             orderId: order.orderId,
@@ -91,7 +93,7 @@ export default function Home() {
         content,
       })),
     }),
-    [order, policyResults, selected.inquiry]
+    [order, policyResults, selected.category, selected.inquiry, selected.title]
   );
   const suggestionQuery = useAiSuggestion(
     selected.ticketId,
@@ -163,7 +165,7 @@ export default function Home() {
       agentId: "데모 담당자",
       createdAt: new Date().toISOString(),
       finalResponse,
-      aiConfidence: activeSuggestion.confidence,
+      aiConfidenceScore: activeSuggestion.confidenceScore,
       policyReferences: activeSuggestion.policyReferences,
     };
     const nextHistories = [history, ...histories];
@@ -200,7 +202,7 @@ export default function Home() {
       agentId: currentAgent.agentId,
       createdAt: new Date().toISOString(),
       finalResponse: finalDraft,
-      aiConfidence: activeSuggestion?.confidence,
+      aiConfidenceScore: activeSuggestion?.confidenceScore,
       policyReferences: activeSuggestion?.policyReferences,
     };
     const nextHistories = [history, ...histories];
@@ -237,7 +239,7 @@ export default function Home() {
       toAgentId: agentId,
       note,
       createdAt: new Date().toISOString(),
-      aiConfidence: activeSuggestion?.confidence,
+      aiConfidenceScore: activeSuggestion?.confidenceScore,
       policyReferences: activeSuggestion?.policyReferences,
     };
     const nextHistories = [history, ...histories];

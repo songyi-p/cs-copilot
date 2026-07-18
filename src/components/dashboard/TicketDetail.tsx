@@ -171,6 +171,9 @@ export function TicketDetail({
                 {history.note && <p className="mb-2 text-[11px] leading-[1.6] text-muted">이관 메모: {history.note}</p>}
                 <p className="m-0 text-[10px] text-timestamp">
                   {history.agentId} · {formatDateTime(history.createdAt)}
+                  {history.aiConfidenceScore
+                    ? ` · AI 신뢰도 ${history.aiConfidenceScore}/5점`
+                    : ""}
                 </p>
               </div>
             ))}

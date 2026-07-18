@@ -1,7 +1,7 @@
-import type { AiConfidence, AiPolicyReference } from "@/utils/ai-schemas";
+import type { AiConfidenceScore, AiPolicyReference } from "@/utils/ai-schemas";
 
 export type {
-  AiConfidence,
+  AiConfidenceScore,
   AiOrderContext,
   AiPolicyContext,
   AiPolicyReference,
@@ -79,6 +79,6 @@ export type ActionHistory = {
   note?: string;
   fromAgentId?: string;
   toAgentId?: string;
-  aiConfidence?: AiConfidence;
+  aiConfidenceScore?: AiConfidenceScore;
   policyReferences?: AiPolicyReference[];
 };

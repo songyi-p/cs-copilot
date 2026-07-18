@@ -1,6 +1,6 @@
 import type {
   ActionHistory,
-  AiConfidence,
+  AiConfidenceScore,
   AiRecommendedAction,
 } from "@/utils/types";
 
@@ -44,11 +44,22 @@ export const aiDecisionLabel: Record<NonNullable<ActionHistory["aiDecision"]>, s
 export const aiRecommendedActionLabel: Record<AiRecommendedAction, string> = {
   REFUND_REVIEW: "환불 가능 여부 검토",
   DELAY_COUPON: "배송 지연 쿠폰 발급 검토",
+  EXCHANGE_REVIEW: "교환 가능 여부 검토",
+  RETURN_REVIEW: "반품 가능 여부 검토",
+  DEFECT_EVIDENCE_REQUEST: "불량·오배송 증빙 확인",
+  CANCELLATION_REQUEST: "출고 전 주문 취소 검토",
+  ORDER_CHANGE_CHECK: "주문 변경 가능 여부 확인",
+  ADDRESS_CHANGE_CHECK: "배송지 변경 가능 여부 확인",
+  DELIVERY_TRACE: "배송 위치 및 인계 상태 확인",
+  REFUND_STATUS_NOTICE: "환불 반영 기간 안내",
+  MEMBERSHIP_GUIDE: "회원 등급 혜택 안내",
   ESCALATE: "담당자 이관 권장",
 };
 
-export const aiConfidenceLabel: Record<AiConfidence, string> = {
-  high: "신뢰도 높음",
-  medium: "신뢰도 보통",
-  low: "신뢰도 낮음",
+export const aiConfidenceLabel: Record<AiConfidenceScore, string> = {
+  1: "근거 부족",
+  2: "추가 판단 필요",
+  3: "외부 확인 필요",
+  4: "근거 충분",
+  5: "판단 명확",
 };

@@ -3,10 +3,19 @@ import { z } from "zod";
 export const aiRecommendedActionSchema = z.enum([
   "REFUND_REVIEW",
   "DELAY_COUPON",
+  "EXCHANGE_REVIEW",
+  "RETURN_REVIEW",
+  "DEFECT_EVIDENCE_REQUEST",
+  "CANCELLATION_REQUEST",
+  "ORDER_CHANGE_CHECK",
+  "ADDRESS_CHANGE_CHECK",
+  "DELIVERY_TRACE",
+  "REFUND_STATUS_NOTICE",
+  "MEMBERSHIP_GUIDE",
   "ESCALATE",
 ]);
 
-export const aiConfidenceSchema = z.enum(["high", "medium", "low"]);
+export const aiConfidenceScoreSchema = z.number().int().min(1).max(5);
 
 export const aiPolicyReferenceSchema = z
   .object({
@@ -21,7 +30,10 @@ export const aiSuggestionSchema = z
     replyDraft: z.string().min(1).max(800),
     policyReferences: z.array(aiPolicyReferenceSchema).max(4),
     recommendedAction: aiRecommendedActionSchema,
-    confidence: aiConfidenceSchema,
+    confidenceScore: aiConfidenceScoreSchema,
+    confidenceReason: z.string().trim().min(1).max(1_000),
+    missingInformation: z.array(z.string().trim().min(1).max(300)).max(5),
+    reviewRequired: z.boolean(),
   })
   .strict();
 
@@ -45,18 +57,30 @@ export const aiPolicyContextSchema = z
   })
   .strict();
 
+export const aiOrderFactsSchema = aiOrderContextSchema
+  .extend({
+    evaluatedAt: z.string().trim().min(1).max(100),
+    daysPastDeliveryExpected: z.number().int().nonnegative().nullable(),
+    daysSinceDelivered: z.number().int().nonnegative().nullable(),
+    isBeforeShipment: z.boolean(),
+  })
+  .strict();
+
 export const aiSuggestionRequestSchema = z
   .object({
-    inquiry: z.string().trim().min(1).max(4_000),
+    inquiryTitle: z.string().trim().min(1).max(300),
+    inquiryContent: z.string().trim().min(1).max(4_000),
+    ticketCategory: z.string().trim().min(1).max(100),
     order: aiOrderContextSchema.nullable(),
-    policies: z.array(aiPolicyContextSchema).max(4),
+    policies: z.array(aiPolicyContextSchema).max(5),
   })
   .strict();
 
 export type AiRecommendedAction = z.infer<typeof aiRecommendedActionSchema>;
-export type AiConfidence = z.infer<typeof aiConfidenceSchema>;
+export type AiConfidenceScore = z.infer<typeof aiConfidenceScoreSchema>;
 export type AiPolicyReference = z.infer<typeof aiPolicyReferenceSchema>;
 export type AiSuggestion = z.infer<typeof aiSuggestionSchema>;
 export type AiOrderContext = z.infer<typeof aiOrderContextSchema>;
+export type AiOrderFacts = z.infer<typeof aiOrderFactsSchema>;
 export type AiPolicyContext = z.infer<typeof aiPolicyContextSchema>;
 export type AiSuggestionRequest = z.infer<typeof aiSuggestionRequestSchema>;

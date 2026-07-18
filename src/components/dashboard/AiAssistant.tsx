@@ -1,12 +1,14 @@
-import type { AiSuggestion } from "@/utils/types";
+import type { AiConfidenceScore, AiSuggestion } from "@/utils/types";
 import { aiConfidenceLabel, aiRecommendedActionLabel } from "@/utils/constants";
 import { cn } from "@/utils/cn";
 
 const sectionLabelClass = "mb-2.75 text-[11px] font-extrabold text-label";
-const confidenceStyles = {
-  high: "bg-[#e8f7f0] text-[#3c8a6a]",
-  medium: "bg-status-review-bg text-status-review",
-  low: "bg-status-escalated-bg text-status-escalated",
+const confidenceStyles: Record<AiConfidenceScore, string> = {
+  1: "bg-status-escalated-bg text-status-escalated",
+  2: "bg-status-escalated-bg text-status-escalated",
+  3: "bg-status-review-bg text-status-review",
+  4: "bg-[#e8f7f0] text-[#3c8a6a]",
+  5: "bg-[#e8f7f0] text-[#2f7659]",
 };
 
 export function AiAssistant({
@@ -27,12 +29,9 @@ export function AiAssistant({
   canEdit: boolean;
 }) {
   const response = draft || suggestion?.replyDraft || "";
-  const displayedAction =
-    suggestion?.confidence === "low"
-      ? "담당자 이관 권장"
-      : suggestion
-      ? aiRecommendedActionLabel[suggestion.recommendedAction]
-      : "AI 제안을 기다리는 중입니다.";
+  const displayedAction = suggestion
+    ? aiRecommendedActionLabel[suggestion.recommendedAction]
+    : "AI 제안을 기다리는 중입니다.";
 
   return (
     <aside className="min-h-0 overflow-y-auto border-l border-line bg-white px-6.5 py-7.25 scrollbar-gutter-stable max-dashboard:col-span-full max-dashboard:border-t max-dashboard:border-l-0 max-mobile:px-4 max-mobile:py-5.5">
@@ -48,10 +47,10 @@ export function AiAssistant({
           <span
             className={cn(
               "rounded-[3px] px-1.75 py-1 text-[10px] font-bold",
-              confidenceStyles[suggestion.confidence]
+              confidenceStyles[suggestion.confidenceScore]
             )}
           >
-            {aiConfidenceLabel[suggestion.confidence]}
+            {suggestion.confidenceScore}/5점 · {aiConfidenceLabel[suggestion.confidenceScore]}
           </span>
         ) : (
           <span className="rounded-[3px] bg-[#eef1f5] px-1.75 py-1 text-[10px] font-bold text-faint">
@@ -146,7 +145,7 @@ export function AiAssistant({
       <section
         className={cn(
           "rounded-[7px] border p-3.75",
-          suggestion?.confidence === "low"
+          suggestion && suggestion.confidenceScore <= 2
             ? "border-[#efcccc] bg-[#fff7f7]"
             : "border-[#d9d5f5] bg-[#f7f5ff]"
         )}
@@ -154,18 +153,49 @@ export function AiAssistant({
         <div
           className={cn(
             "mb-2.75 text-[11px] font-extrabold",
-            suggestion?.confidence === "low" ? "text-status-escalated" : "text-[#7667bd]"
+            suggestion && suggestion.confidenceScore <= 2
+              ? "text-status-escalated"
+              : "text-[#7667bd]"
           )}
         >
           권장 처리안
         </div>
         <strong className="text-xs leading-[1.6]">{displayedAction}</strong>
         <p className="mt-1.75 mb-0 text-[11px] text-[#778199]">
-          {suggestion?.confidence === "low"
-            ? "정책 근거가 충분하지 않아 담당자 확인이 필요합니다."
-            : "주문 상태와 검색된 정책을 반영한 제안입니다."}
+          {suggestion?.confidenceReason ?? "주문 상태와 검색된 정책을 분석하고 있습니다."}
         </p>
+        {suggestion && (
+          <div className="mt-3 border-t border-[#e4e0f5] pt-3">
+            <div className="mb-2 flex gap-1" aria-label={`신뢰도 ${suggestion.confidenceScore}점`}>
+              {([1, 2, 3, 4, 5] as const).map((score) => (
+                <span
+                  className={cn(
+                    "h-1.5 flex-1 rounded-full",
+                    score <= suggestion.confidenceScore ? "bg-[#7667bd]" : "bg-[#e1deef]"
+                  )}
+                  key={score}
+                />
+              ))}
+            </div>
+            <p className="m-0 text-[10px] font-semibold text-[#778199]">
+              {suggestion.reviewRequired
+                ? "실제 처리는 담당자 확인 또는 승인이 필요합니다."
+                : "추가 확인 없이 안내 가능한 제안입니다."}
+            </p>
+          </div>
+        )}
       </section>
+
+      {suggestion?.missingInformation.length ? (
+        <section className="mt-3.5 rounded-[7px] border border-[#ecdcb7] bg-[#fffbf1] p-3.75">
+          <div className="mb-2 text-[11px] font-extrabold text-[#8b641d]">추가 확인 정보</div>
+          <ul className="m-0 space-y-1 pl-4 text-[11px] leading-[1.55] text-[#74664a]">
+            {suggestion.missingInformation.map((information) => (
+              <li key={information}>{information}</li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </aside>
   );
 }
