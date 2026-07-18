@@ -26,7 +26,7 @@ Policy   (1) ─── PolicyReference (0..N)
 | Ticket        | `ticketId`   | 고객/주문, 문의, 분류, 처리 상태             |
 | Policy        | `policyId`   | Markdown 문서의 frontmatter 및 섹션          |
 | PolicyReference | `referenceId` | 티켓, 정책, 인용 섹션, 참조 이유           |
-| ActionHistory | `historyId`  | AI 제안, 담당자 수정, 승인 결과, 정책 근거   |
+| ActionHistory | `historyId`  | AI 제안, 신뢰도, 담당자 수정, 승인 결과, 정책 근거 |
 
 ## 상태값
 
@@ -34,6 +34,28 @@ Policy   (1) ─── PolicyReference (0..N)
 - 문의: `OPEN`, `IN_REVIEW`, `RESOLVED`, `ESCALATED`
 - AI 권장 처리: `REFUND_REVIEW`, `DELAY_COUPON`, `EXCHANGE_REVIEW`, `ESCALATE`
 - AI 제안 결과: `ADOPTED`, `EDITED`, `REJECTED`
+- AI 신뢰도: `high`, `medium`, `low`
+
+## AI 제안 계약
+
+AI 제안은 고객 답변 초안, 정책 근거, 권장 처리 코드, 신뢰도로 구성한다.
+
+```ts
+type AiSuggestion = {
+  replyDraft: string; // 800자 이내
+  policyReferences: {
+    policyId: string;
+    section: string;
+    reason: string;
+  }[];
+  recommendedAction: "REFUND_REVIEW" | "DELAY_COUPON" | "ESCALATE";
+  confidence: "high" | "medium" | "low";
+};
+```
+
+`policyReferences`는 검색되어 모델에 전달된 정책만 참조할 수 있다. `confidence`가 `low`이면
+자동 권장 처리안 대신 담당자 이관을 권장하지만, 모델이 반환한 원본 처리 코드는 처리 이력에
+보존한다.
 
 ## 첫 번째 데모 흐름
 

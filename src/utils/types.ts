@@ -1,3 +1,15 @@
+import type { AiConfidence, AiPolicyReference } from "@/utils/ai-schemas";
+
+export type {
+  AiConfidence,
+  AiOrderContext,
+  AiPolicyContext,
+  AiPolicyReference,
+  AiRecommendedAction,
+  AiSuggestion,
+  AiSuggestionRequest,
+} from "@/utils/ai-schemas";
+
 export type Ticket = {
   ticketId: string;
   customerId: string;
@@ -63,4 +75,6 @@ export type ActionHistory = {
   note?: string;
   fromAgentId?: string;
   toAgentId?: string;
+  aiConfidence?: AiConfidence;
+  policyReferences?: AiPolicyReference[];
 };
