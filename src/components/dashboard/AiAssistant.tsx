@@ -61,9 +61,9 @@ export function AiAssistant({
       </div>
 
       {status === "loading" && (
-        <div className="mb-5 rounded-md border border-[#dce2ea] bg-[#f7f9fc] px-3.5 py-3 text-xs text-muted">
+        <p className="mb-5 text-xs leading-[1.6] text-muted">
           주문 정보와 검색된 정책을 바탕으로 AI 제안을 생성하고 있습니다.
-        </div>
+        </p>
       )}
       {status === "error" && (
         <div className="mb-5 rounded-md border border-[#f0cccc] bg-[#fff7f7] px-3.5 py-3">
@@ -88,16 +88,32 @@ export function AiAssistant({
             현재 담당자만 답변을 수정하고 승인할 수 있습니다.
           </p>
         )}
-        <textarea
-          className="min-h-44 w-full resize-y rounded-md border border-[#dce2ea] bg-[#fbfcff] p-3.25 text-xs leading-[1.7] text-[#344052] outline-[#7389e8] select-text disabled:cursor-not-allowed disabled:bg-[#f3f5f8] disabled:text-[#788394]"
-          value={response}
-          onChange={(event) => onDraftChange(event.target.value)}
-          aria-label="답변 초안"
-          placeholder={
-            status === "error" ? "AI 제안 없이 직접 답변을 작성할 수 있습니다." : "AI 답변 생성 중"
-          }
-          disabled={!canEdit || status === "loading"}
-        />
+        <div className="relative">
+          <textarea
+            className="block min-h-44 w-full resize-y rounded-md border border-[#dce2ea] bg-[#fbfcff] p-3.25 text-xs leading-[1.7] text-[#344052] outline-[#7389e8] select-text disabled:cursor-not-allowed disabled:bg-[#f3f5f8] disabled:text-[#788394]"
+            value={response}
+            onChange={(event) => onDraftChange(event.target.value)}
+            aria-busy={status === "loading"}
+            aria-label="답변 초안"
+            placeholder={
+              status === "error"
+                ? "AI 제안 없이 직접 답변을 작성할 수 있습니다."
+                : "AI 답변 생성 중"
+            }
+            disabled={!canEdit || status === "loading"}
+          />
+          {status === "loading" && (
+            <div
+              className="absolute inset-0 grid place-items-center rounded-md border border-[#cddcf6] bg-[#f4f8ff]/92 backdrop-blur-[1px]"
+              role="status"
+            >
+              <div className="flex flex-col items-center gap-3 text-[#6685c7]">
+                <span className="size-7 animate-spin rounded-full border-3 border-[#cfdef8] border-t-[#7193da]" />
+                <span className="text-[11px] font-bold tracking-[-0.1px]">AI 답변 생성 중</span>
+              </div>
+            </div>
+          )}
+        </div>
       </section>
 
       <section className="mb-5 border-b border-line pb-5 max-dashboard:max-w-162.5">
