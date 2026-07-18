@@ -18,7 +18,7 @@ export const aiPolicyReferenceSchema = z
 
 export const aiSuggestionSchema = z
   .object({
-    replyDraft: z.string().min(1).max(4_000),
+    replyDraft: z.string().min(1).max(800),
     policyReferences: z.array(aiPolicyReferenceSchema).max(4),
     recommendedAction: aiRecommendedActionSchema,
     confidence: aiConfidenceSchema,

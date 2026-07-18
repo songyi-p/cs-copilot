@@ -45,10 +45,10 @@ cp .env.example .env.local
 
 ```dotenv
 OPENAI_API_KEY=your_api_key
-OPENAI_MODEL=gpt-5-mini
+OPENAI_MODEL=gpt-5.4-nano
 ```
 
-`OPENAI_MODEL`은 선택 사항이며 설정하지 않으면 `gpt-5-mini`를 사용합니다. API 키가 없거나
+`OPENAI_MODEL`은 선택 사항이며 설정하지 않으면 `gpt-5.4-nano`를 사용합니다. API 키가 없거나
 LLM 호출에 실패하면 화면에 실패 상태와 재시도 버튼을 표시하며, 하드코딩된 답변을 AI 결과로
 대체하지 않습니다.
 
@@ -70,7 +70,7 @@ npm run dev
 
 ```ts
 {
-  replyDraft: string;
+  replyDraft: string; // 800자 이내
   policyReferences: {
     policyId: string;
     section: string;
