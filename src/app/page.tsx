@@ -5,6 +5,7 @@ import { ActionBar } from "@/components/dashboard/ActionBar";
 import { Toast } from "@/components/common/Toast";
 import { AiAssistant } from "@/components/dashboard/AiAssistant";
 import { AppHeader } from "@/components/dashboard/AppHeader";
+import { InactiveAiAssistant } from "@/components/dashboard/InactiveAiAssistant";
 import { TicketDetail } from "@/components/dashboard/TicketDetail";
 import { TicketList } from "@/components/dashboard/TicketList";
 import type {
@@ -59,6 +60,8 @@ export default function Home() {
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   const assignee = agents.find((agent) => agent.agentId === selected.assigneeId)!;
   const canEdit = currentAgent.role === "ADMIN" || selected.assigneeId === currentAgent.agentId;
+  const isAiSuggestionDisabled =
+    selected.status === "RESOLVED" || selected.status === "ESCALATED";
   const suggestionRequest = useMemo<AiSuggestionRequest>(
     () => ({
       inquiry: selected.inquiry,
@@ -81,14 +84,20 @@ export default function Home() {
     }),
     [order, policyResults, selected.inquiry]
   );
-  const suggestionQuery = useAiSuggestion(selected.ticketId, suggestionRequest);
-  const activeSuggestion = suggestionQuery.data;
+  const suggestionQuery = useAiSuggestion(
+    selected.ticketId,
+    suggestionRequest,
+    !isAiSuggestionDisabled
+  );
+  const activeSuggestion = isAiSuggestionDisabled ? undefined : suggestionQuery.data;
   const activeSuggestionStatus = suggestionQuery.isFetching
     ? "loading"
     : suggestionQuery.isError
       ? "error"
       : "success";
   const activeSuggestionError = suggestionQuery.isError ? suggestionQuery.error.message : "";
+  const historicalResponse =
+    ticketHistories.find((history) => history.finalResponse)?.finalResponse ?? "";
 
   useEffect(() => {
     const saved = window.localStorage.getItem(HISTORY_STORAGE_KEY);
@@ -254,15 +263,22 @@ export default function Home() {
           histories={ticketHistories}
           assigneeName={assignee.name}
         />
-        <AiAssistant
-          suggestion={activeSuggestion}
-          status={activeSuggestionStatus}
-          error={activeSuggestionError}
-          draft={draft}
-          onDraftChange={setDraft}
-          onRetry={() => suggestionQuery.refetch()}
-          canEdit={canEdit}
-        />
+        {isAiSuggestionDisabled ? (
+          <InactiveAiAssistant
+            mode={selected.status === "RESOLVED" ? "resolved" : "escalated"}
+            response={draft || historicalResponse}
+          />
+        ) : (
+          <AiAssistant
+            suggestion={activeSuggestion}
+            status={activeSuggestionStatus}
+            error={activeSuggestionError}
+            draft={draft}
+            onDraftChange={setDraft}
+            onRetry={() => suggestionQuery.refetch()}
+            canEdit={canEdit}
+          />
+        )}
       </section>
       <ActionBar
         onSaveDraft={saveDraft}

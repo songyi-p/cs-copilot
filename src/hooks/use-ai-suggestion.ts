@@ -4,9 +4,11 @@ import type { AiSuggestion, AiSuggestionRequest } from "@/utils/types";
 
 export const useAiSuggestion = (
   ticketId: string,
-  request: AiSuggestionRequest
+  request: AiSuggestionRequest,
+  enabled = true
 ): UseQueryResult<AiSuggestion, Error> =>
   useQuery<AiSuggestion, Error>({
     queryKey: ["ai-suggestion", ticketId, request],
     queryFn: ({ signal }) => getAiSuggestion(request, signal),
+    enabled,
   });
