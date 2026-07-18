@@ -31,8 +31,8 @@ export function AiAssistant({
     suggestion?.confidence === "low"
       ? "담당자 이관 권장"
       : suggestion
-        ? aiRecommendedActionLabel[suggestion.recommendedAction]
-        : "AI 제안을 기다리는 중입니다.";
+      ? aiRecommendedActionLabel[suggestion.recommendedAction]
+      : "AI 제안을 기다리는 중입니다.";
 
   return (
     <aside className="min-h-0 overflow-y-auto border-l border-line bg-white px-6.5 py-7.25 scrollbar-gutter-stable max-dashboard:col-span-full max-dashboard:border-t max-dashboard:border-l-0 max-mobile:px-4 max-mobile:py-5.5">
@@ -89,7 +89,7 @@ export function AiAssistant({
           </p>
         )}
         <textarea
-          className="min-h-33.75 w-full resize-y rounded-md border border-[#dce2ea] bg-[#fbfcff] p-3.25 text-xs leading-[1.7] text-[#344052] outline-[#7389e8] select-text disabled:cursor-not-allowed disabled:bg-[#f3f5f8] disabled:text-[#788394]"
+          className="min-h-44 w-full resize-y rounded-md border border-[#dce2ea] bg-[#fbfcff] p-3.25 text-xs leading-[1.7] text-[#344052] outline-[#7389e8] select-text disabled:cursor-not-allowed disabled:bg-[#f3f5f8] disabled:text-[#788394]"
           value={response}
           onChange={(event) => onDraftChange(event.target.value)}
           aria-label="답변 초안"
@@ -113,16 +113,16 @@ export function AiAssistant({
               </span>
               <div>
                 <strong className="text-xs">{reference.section}</strong>
-                <p className="my-0.75 text-[11px] leading-[1.45] text-muted">
-                  {reference.reason}
-                </p>
+                <p className="my-0.75 text-[11px] leading-[1.45] text-muted">{reference.reason}</p>
                 <small className="font-mono text-[9px] text-faint">{reference.policyId}</small>
               </div>
             </div>
           ))
         ) : (
           <p className="m-0 text-xs text-faint">
-            {status === "loading" ? "정책 근거를 확인하고 있습니다." : "표시할 정책 근거가 없습니다."}
+            {status === "loading"
+              ? "정책 근거를 확인하고 있습니다."
+              : "표시할 정책 근거가 없습니다."}
           </p>
         )}
       </section>
