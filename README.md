@@ -4,7 +4,7 @@
 
 정책 근거와 주문 맥락을 함께 보여 주고, 상담사가 최종 판단하도록 돕는 AI 고객센터 백오피스
 
-[**라이브 데모 →**](https://cs-copilot-pearl.vercel.app/)
+[**라이브 데모 → https://cs-copilot-pearl.vercel.app**](https://cs-copilot-pearl.vercel.app/)
 
 </div>
 
