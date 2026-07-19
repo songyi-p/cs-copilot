@@ -56,6 +56,37 @@ LLM 호출에 실패하면 화면에 실패 상태와 재시도 버튼을 표시
 npm run dev
 ```
 
+## Vercel 배포
+
+이 프로젝트는 Vercel Hobby 플랜의 Next.js 프로젝트로 배포할 수 있습니다. 저장소를 Vercel에
+연결한 뒤 프로젝트의 Production과 Preview 환경에 다음 환경변수를 등록합니다.
+
+- `OPENAI_API_KEY`: 서버 전용 OpenAI API 키
+- `OPENAI_MODEL`: 선택 사항. 설정하지 않으면 `gpt-5.4-nano` 사용
+
+환경변수를 추가하거나 변경한 경우 기존 배포에는 반영되지 않으므로 다시 배포해야 합니다.
+`/api/ai-suggestion`은 OpenAI 응답을 기다릴 수 있도록 Vercel Function의 최대 실행 시간을
+Hobby 플랜 상한인 60초로 설정합니다.
+
+### AI API 요청 제한
+
+공개 배포에서 OpenAI API 비용을 보호하기 위해 Vercel Dashboard의 **Firewall**에서 다음 WAF
+Rate Limiting 규칙을 생성하고 Production에 게시합니다.
+
+| 항목 | 설정값 |
+| --- | --- |
+| 조건 | Path equals `/api/ai-suggestion`, Method equals `POST` |
+| 동작 | Rate Limit |
+| 방식 | Fixed Window |
+| 기준 | IP |
+| 시간 / 허용량 | 60초 / 5회 |
+| 초과 응답 | 429 |
+
+이 제한은 IP와 리전 단위의 기본적인 비용 보호 장치입니다. 사이트를 여러 사용자에게 공개하거나
+트래픽이 늘면 사용자 인증과 사용자별 제한을 추가합니다. Preview 배포는 Vercel Authentication의
+Standard Protection을 활성화하면 Vercel에서 접근 권한을 받은 사용자만 열 수 있습니다. Hobby의
+Production 도메인은 이 보호 대상이 아니므로 공개 데모의 AI API 보호는 위 WAF 규칙을 사용합니다.
+
 ## LLM 데이터 계약
 
 브라우저는 `/api/ai-suggestion`에 다음 정보만 전달합니다.
