@@ -58,8 +58,8 @@ export function TicketList({
                 <strong className="text-[13px]">{customer.name}</strong>
                 <time className="text-[10px] text-timestamp">{formatDate(ticket.createdAt)}</time>
               </div>
-              <p className="my-1.75 overflow-hidden text-ellipsis whitespace-nowrap text-xs leading-6">
-                {ticket.inquiry}
+              <p className="my-1.75 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-semibold leading-6">
+                {ticket.title}
               </p>
               <div className="flex items-center gap-1.75 text-[10px] text-[#8490a0]">
                 <span

@@ -68,5 +68,89 @@
     "policyId": "POL-REFUND-001",
     "section": "배송 전 취소",
     "reason": "출고 전 주문의 취소 요청 기준"
+  },
+  {
+    "referenceId": "REF-011",
+    "ticketId": "TKT-1005",
+    "policyId": "POL-ORDER-001",
+    "section": "옵션 및 수량 변경",
+    "reason": "결제 후 색상 옵션 변경 제한과 재주문 절차"
+  },
+  {
+    "referenceId": "REF-012",
+    "ticketId": "TKT-1011",
+    "policyId": "POL-MEMBERSHIP-001",
+    "section": "실버 등급 혜택",
+    "reason": "실버 회원 쿠폰의 발급 시점과 사용 조건"
+  },
+  {
+    "referenceId": "REF-013",
+    "ticketId": "TKT-1012",
+    "policyId": "POL-RETURN-001",
+    "section": "신청 가능 기간",
+    "reason": "수령 후 7일이 지난 반품의 예외 검토 기준"
+  },
+  {
+    "referenceId": "REF-014",
+    "ticketId": "TKT-1013",
+    "policyId": "POL-DELIVERY-001",
+    "section": "배송지 변경",
+    "reason": "상품 준비 중 주문의 배송지 변경 확인 절차"
+  },
+  {
+    "referenceId": "REF-015",
+    "ticketId": "TKT-1014",
+    "policyId": "POL-COUPON-001",
+    "section": "배송 지연 쿠폰",
+    "reason": "배송 예정일 기준 쿠폰 발급 최소 지연 일수"
+  },
+  {
+    "referenceId": "REF-016",
+    "ticketId": "TKT-1015",
+    "policyId": "POL-DEFECT-001",
+    "section": "증빙 확인",
+    "reason": "오배송 상품과 주문 내역의 사진 증빙 기준"
+  },
+  {
+    "referenceId": "REF-017",
+    "ticketId": "TKT-1016",
+    "policyId": "POL-RETURN-001",
+    "section": "교환",
+    "reason": "미사용 상품의 색상 교환과 재고 확인 조건"
+  },
+  {
+    "referenceId": "REF-018",
+    "ticketId": "TKT-1017",
+    "policyId": "POL-ORDER-001",
+    "section": "출고 전 주문 취소",
+    "reason": "상품 준비 중 주문의 취소 가능 여부 확인"
+  },
+  {
+    "referenceId": "REF-019",
+    "ticketId": "TKT-1018",
+    "policyId": "POL-DEFECT-001",
+    "section": "처리",
+    "reason": "사용 후 파손 상품의 초기 불량 검토 기준"
+  },
+  {
+    "referenceId": "REF-020",
+    "ticketId": "TKT-1019",
+    "policyId": "POL-ORDER-001",
+    "section": "옵션 및 수량 변경",
+    "reason": "결제 후 수량 변경 제한과 추가 주문 안내"
+  },
+  {
+    "referenceId": "REF-021",
+    "ticketId": "TKT-1019",
+    "policyId": "POL-ORDER-001",
+    "section": "합배송",
+    "reason": "별도 주문의 합배송 및 배송비 조정 기준"
+  },
+  {
+    "referenceId": "REF-022",
+    "ticketId": "TKT-1020",
+    "policyId": "POL-DELIVERY-001",
+    "section": "배송 완료 미수령",
+    "reason": "배송 완료 표시 후 미수령 상품의 확인 절차"
   }
 ]

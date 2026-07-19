@@ -35,9 +35,7 @@ export function TicketDetail({
           <p className="mb-1 font-mono text-[10px] font-medium tracking-[1.3px] text-eyebrow">
             TICKET {ticket.ticketId}
           </p>
-          <h2 className="m-0 text-[22px] font-bold tracking-[-0.5px]">
-            {categoryLabel[ticket.category]} 문의
-          </h2>
+          <h2 className="m-0 text-[22px] font-bold tracking-[-0.5px]">{ticket.title}</h2>
         </div>
         <span className={cn("inline-block rounded-[3px] px-1.75 py-0.75 text-[10px] font-bold", statusStyles[ticket.status])}>{statusLabel[ticket.status]}</span>
       </div>
@@ -56,8 +54,12 @@ export function TicketDetail({
         </span>
       </article>
       <article className={cn(cardClass, "mb-4.5 px-5 py-4.5")}>
-        <p className="mb-2.25 text-[11px] font-extrabold text-label">고객 문의</p>
-        <p className="mb-2.75 text-[15px] font-semibold leading-[1.6]">“{ticket.inquiry}”</p>
+        <p className="mb-2.25 text-[11px] font-extrabold text-label">
+          고객 문의 · {categoryLabel[ticket.category]}
+        </p>
+        <p className="mb-2.75 whitespace-pre-wrap text-[14px] font-medium leading-[1.75]">
+          {ticket.inquiry}
+        </p>
         <p className="m-0 text-[10px] text-timestamp">{formatDateTime(ticket.createdAt)}</p>
       </article>
       <div className="mb-3.5 grid grid-cols-2 gap-3.5 max-mobile:grid-cols-1">
@@ -169,6 +171,9 @@ export function TicketDetail({
                 {history.note && <p className="mb-2 text-[11px] leading-[1.6] text-muted">이관 메모: {history.note}</p>}
                 <p className="m-0 text-[10px] text-timestamp">
                   {history.agentId} · {formatDateTime(history.createdAt)}
+                  {history.aiConfidenceScore
+                    ? ` · AI 신뢰도 ${history.aiConfidenceScore}/5점`
+                    : ""}
                 </p>
               </div>
             ))}

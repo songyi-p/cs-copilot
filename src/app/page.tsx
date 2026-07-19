@@ -19,6 +19,7 @@ import type {
 import { aiRecommendedActionLabel } from "@/utils/constants";
 import { useAiSuggestion } from "@/hooks/use-ai-suggestion";
 import { searchPolicies } from "@/utils/lib";
+import { mergeStoredTicketState, type StoredTicketState } from "@/utils/ticket-storage";
 import actionHistoryData from "@/data/action-history.json";
 import customersData from "@/data/customers.json";
 import ordersData from "@/data/orders.json";
@@ -54,7 +55,16 @@ export default function Home() {
   );
   const customer = customers.find((item) => item.customerId === selected.customerId)!;
   const order = orders.find((item) => item.orderId === selected.orderId);
-  const policyResults = useMemo(() => searchPolicies(selected.inquiry), [selected.inquiry]);
+  const policyResults = useMemo(
+    () =>
+      searchPolicies({
+        title: selected.title,
+        inquiry: selected.inquiry,
+        ticketCategory: selected.category,
+        orderStatus: order?.orderStatus,
+      }),
+    [order?.orderStatus, selected.category, selected.inquiry, selected.title]
+  );
   const ticketHistories = histories
     .filter((item) => item.ticketId === selected.ticketId)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -64,7 +74,9 @@ export default function Home() {
     selected.status === "RESOLVED" || selected.status === "ESCALATED";
   const suggestionRequest = useMemo<AiSuggestionRequest>(
     () => ({
-      inquiry: selected.inquiry,
+      inquiryTitle: selected.title,
+      inquiryContent: selected.inquiry,
+      ticketCategory: selected.category,
       order: order
         ? {
             orderId: order.orderId,
@@ -82,7 +94,7 @@ export default function Home() {
         content,
       })),
     }),
-    [order, policyResults, selected.inquiry]
+    [order, policyResults, selected.category, selected.inquiry, selected.title]
   );
   const suggestionQuery = useAiSuggestion(
     selected.ticketId,
@@ -107,17 +119,13 @@ export default function Home() {
     try {
       if (saved) setHistories(JSON.parse(saved) as ActionHistory[]);
       if (savedTickets) {
-        const parsedTickets = JSON.parse(savedTickets) as Ticket[];
+        const parsedTickets = JSON.parse(savedTickets) as StoredTicketState[];
         setTickets(
-          parsedTickets.map((ticket) => ({
-            ...ticket,
-            assigneeId:
-              ticket.assigneeId && agents.some((agent) => agent.agentId === ticket.assigneeId)
-                ? ticket.assigneeId
-                : ticket.ticketId === "TKT-1004"
-                  ? "agent-lee"
-                  : currentAgent.agentId,
-          }))
+          mergeStoredTicketState(
+            initialTickets,
+            parsedTickets,
+            agents.map((agent) => agent.agentId)
+          )
         );
       }
       if (savedDrafts) {
@@ -154,7 +162,7 @@ export default function Home() {
       agentId: "데모 담당자",
       createdAt: new Date().toISOString(),
       finalResponse,
-      aiConfidence: activeSuggestion.confidence,
+      aiConfidenceScore: activeSuggestion.confidenceScore,
       policyReferences: activeSuggestion.policyReferences,
     };
     const nextHistories = [history, ...histories];
@@ -191,7 +199,7 @@ export default function Home() {
       agentId: currentAgent.agentId,
       createdAt: new Date().toISOString(),
       finalResponse: finalDraft,
-      aiConfidence: activeSuggestion?.confidence,
+      aiConfidenceScore: activeSuggestion?.confidenceScore,
       policyReferences: activeSuggestion?.policyReferences,
     };
     const nextHistories = [history, ...histories];
@@ -228,7 +236,7 @@ export default function Home() {
       toAgentId: agentId,
       note,
       createdAt: new Date().toISOString(),
-      aiConfidence: activeSuggestion?.confidence,
+      aiConfidenceScore: activeSuggestion?.confidenceScore,
       policyReferences: activeSuggestion?.policyReferences,
     };
     const nextHistories = [history, ...histories];

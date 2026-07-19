@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  getAiErrorDiagnostics,
   getAiErrorStatus,
   parseAiSuggestionRequest,
   requestAiSuggestion,
@@ -27,6 +28,8 @@ export async function POST(request: Request) {
     return NextResponse.json(suggestion);
   } catch (error) {
     const status = getAiErrorStatus(error);
+    const diagnostics = getAiErrorDiagnostics(error);
+    console.error("[ai-suggestion] request failed", diagnostics);
     const message =
       status === 503
         ? "AI 제안 기능이 아직 설정되지 않았습니다."

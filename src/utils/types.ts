@@ -1,7 +1,7 @@
-import type { AiConfidence, AiPolicyReference } from "@/utils/ai-schemas";
+import type { AiConfidenceScore, AiPolicyReference } from "@/utils/ai-schemas";
 
 export type {
-  AiConfidence,
+  AiConfidenceScore,
   AiOrderContext,
   AiPolicyContext,
   AiPolicyReference,
@@ -14,6 +14,7 @@ export type Ticket = {
   ticketId: string;
   customerId: string;
   orderId: string | null;
+  title: string;
   inquiry: string;
   category: string;
   status: string;
@@ -54,10 +55,13 @@ export type PolicySearchItem = {
   section: string;
   content: string;
   keywords: string[];
+  ticketCategories: string[];
+  orderStatuses: string[];
 };
 
 export type PolicySearchResult = PolicySearchItem & {
   matchedKeywords: string[];
+  matchedTerms: string[];
   score: number;
 };
 
@@ -75,6 +79,6 @@ export type ActionHistory = {
   note?: string;
   fromAgentId?: string;
   toAgentId?: string;
-  aiConfidence?: AiConfidence;
+  aiConfidenceScore?: AiConfidenceScore;
   policyReferences?: AiPolicyReference[];
 };

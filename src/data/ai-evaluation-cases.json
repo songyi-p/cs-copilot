@@ -1,0 +1,22 @@
+[
+  { "ticketId": "TKT-1001", "expectedPolicySectionIds": ["POL-DELIVERY-001-DELAY", "POL-DELIVERY-001-EXPECTED-DATE"], "expectedAction": "DELIVERY_TRACE", "expectedScoreRange": [3, 4] },
+  { "ticketId": "TKT-1002", "expectedPolicySectionIds": ["POL-RETURN-001-EXCHANGE"], "expectedAction": "EXCHANGE_REVIEW", "expectedScoreRange": [3, 3] },
+  { "ticketId": "TKT-1003", "expectedPolicySectionIds": ["POL-RETURN-001-PERIOD", "POL-RETURN-001-FEE"], "expectedAction": "RETURN_REVIEW", "expectedScoreRange": [4, 4] },
+  { "ticketId": "TKT-1004", "expectedPolicySectionIds": ["POL-DELIVERY-001-ADDRESS"], "expectedAction": "ADDRESS_CHANGE_CHECK", "expectedScoreRange": [3, 3] },
+  { "ticketId": "TKT-1005", "expectedPolicySectionIds": ["POL-ORDER-001-OPTION", "POL-ORDER-001-CANCEL"], "expectedAction": "ORDER_CHANGE_CHECK", "expectedScoreRange": [3, 4] },
+  { "ticketId": "TKT-1006", "expectedPolicySectionIds": ["POL-REFUND-001-PERIOD"], "expectedAction": "REFUND_STATUS_NOTICE", "expectedScoreRange": [5, 5] },
+  { "ticketId": "TKT-1007", "expectedPolicySectionIds": ["POL-RETURN-001-FEE"], "expectedAction": "RETURN_FEE_NOTICE", "expectedScoreRange": [5, 5] },
+  { "ticketId": "TKT-1008", "expectedPolicySectionIds": ["POL-REFUND-001-DELAY", "POL-DELIVERY-001-DELAY"], "expectedAction": "REFUND_REVIEW", "expectedScoreRange": [4, 4] },
+  { "ticketId": "TKT-1009", "expectedPolicySectionIds": ["POL-DEFECT-001-EVIDENCE", "POL-DEFECT-001-ACTION"], "expectedAction": "DEFECT_EVIDENCE_REQUEST", "expectedScoreRange": [3, 3] },
+  { "ticketId": "TKT-1010", "expectedPolicySectionIds": ["POL-ORDER-001-CANCEL", "POL-REFUND-001-BEFORE-SHIPPING"], "expectedAction": "CANCELLATION_REQUEST", "expectedScoreRange": [4, 4] },
+  { "ticketId": "TKT-1011", "expectedPolicySectionIds": ["POL-MEMBERSHIP-001-SILVER", "POL-MEMBERSHIP-001-REWARD"], "expectedAction": "MEMBERSHIP_GUIDE", "expectedScoreRange": [5, 5] },
+  { "ticketId": "TKT-1012", "expectedPolicySectionIds": ["POL-RETURN-001-PERIOD"], "expectedAction": "RETURN_REVIEW", "expectedScoreRange": [2, 3] },
+  { "ticketId": "TKT-1013", "expectedPolicySectionIds": ["POL-DELIVERY-001-ADDRESS"], "expectedAction": "ADDRESS_CHANGE_CHECK", "expectedScoreRange": [3, 3] },
+  { "ticketId": "TKT-1014", "expectedPolicySectionIds": ["POL-COUPON-001-DELAY", "POL-DELIVERY-001-DELAY"], "expectedAction": "DELIVERY_TRACE", "expectedScoreRange": [4, 4] },
+  { "ticketId": "TKT-1015", "expectedPolicySectionIds": ["POL-DEFECT-001-EVIDENCE", "POL-DEFECT-001-ACTION"], "expectedAction": "DEFECT_EVIDENCE_REQUEST", "expectedScoreRange": [3, 3] },
+  { "ticketId": "TKT-1016", "expectedPolicySectionIds": ["POL-RETURN-001-EXCHANGE"], "expectedAction": "EXCHANGE_REVIEW", "expectedScoreRange": [3, 3] },
+  { "ticketId": "TKT-1017", "expectedPolicySectionIds": ["POL-ORDER-001-CANCEL", "POL-REFUND-001-BEFORE-SHIPPING"], "expectedAction": "CANCELLATION_REQUEST", "expectedScoreRange": [3, 3] },
+  { "ticketId": "TKT-1018", "expectedPolicySectionIds": ["POL-DEFECT-001-EVIDENCE", "POL-DEFECT-001-ACTION"], "expectedAction": "DEFECT_EVIDENCE_REQUEST", "expectedScoreRange": [3, 3] },
+  { "ticketId": "TKT-1019", "expectedPolicySectionIds": ["POL-ORDER-001-OPTION", "POL-ORDER-001-COMBINE"], "expectedAction": "ORDER_CHANGE_CHECK", "expectedScoreRange": [3, 4] },
+  { "ticketId": "TKT-1020", "expectedPolicySectionIds": ["POL-DELIVERY-001-MISSING"], "expectedAction": "DELIVERY_TRACE", "expectedScoreRange": [3, 3] }
+]
