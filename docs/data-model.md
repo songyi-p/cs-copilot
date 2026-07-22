@@ -31,6 +31,7 @@ Policy   (1) ─── PolicyReference (0..N)
 ## 상태값
 
 - 주문: `PAID`, `PREPARING`, `IN_TRANSIT`, `DELIVERED`, `CANCELLED`, `REFUNDED`
+- 주문 상태 코드는 저장과 검색 조건에만 사용하며 정책 본문, LLM 입력과 고객 안내에는 각각 결제 완료, 상품 준비 중, 배송 중, 배송 완료, 주문 취소, 환불 완료로 표현한다.
 - 문의: `OPEN`, `IN_REVIEW`, `RESOLVED`, `ESCALATED`
 - AI 권장 처리: 환불·쿠폰·교환·반품·불량 증빙·취소·주문 변경·배송지 변경·배송 추적·환불/반품비 안내·회원 혜택·이관
 - AI 제안 결과: `ADOPTED`, `EDITED`, `REJECTED`

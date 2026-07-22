@@ -16,7 +16,7 @@
     "policyTitle": "배송 및 배송 지연 정책",
     "category": "DELIVERY",
     "section": "배송 지연",
-    "content": "예정일보다 2일 이상 늦고 주문 상태가 IN_TRANSIT인 경우, 담당자는 사과 답변과 함께 3,000원 쿠폰 발급을 제안할 수 있습니다. 분실 또는 배송 정보 미갱신이 의심되면 택배사 확인을 위해 담당자 이관을 제안합니다.",
+    "content": "상품이 배송 중인 상태에서 예정일보다 2일 이상 늦어진 경우, 담당자는 사과 답변과 함께 3,000원 쿠폰 발급을 제안할 수 있습니다. 분실 또는 배송 정보 미갱신이 의심되면 택배사 확인을 위해 담당자 이관을 제안합니다.",
     "keywords": ["배송 지연", "배송이 늦", "예정일이 지났", "아직 받지 못", "조회가 멈", "갱신되지", "분실"],
     "ticketCategories": ["DELIVERY_DELAY"],
     "orderStatuses": ["IN_TRANSIT"]
@@ -27,7 +27,7 @@
     "policyTitle": "배송 및 배송 지연 정책",
     "category": "DELIVERY",
     "section": "배송지 변경",
-    "content": "주문 상태가 PAID 또는 PREPARING이면 담당자가 출고 여부를 확인한 뒤 배송지 변경을 접수할 수 있습니다. 배송 중인 경우 변경을 보장할 수 없으며 택배사 가능 여부를 확인합니다.",
+    "content": "주문이 결제 완료 또는 상품 준비 중 단계라면 담당자가 출고 여부를 확인한 뒤 배송지 변경을 접수할 수 있습니다. 상품이 출고되어 배송 중인 경우 배송지 변경은 보장할 수 없으며 담당자가 택배사 가능 여부를 확인한 뒤 안내합니다.",
     "keywords": ["배송지 변경", "주소 변경", "배송 주소", "새 주소", "수령 주소"],
     "ticketCategories": ["DELIVERY_ADDRESS"],
     "orderStatuses": ["PAID", "PREPARING", "IN_TRANSIT"]
@@ -159,7 +159,7 @@
     "policyTitle": "주문 변경 및 취소 정책",
     "category": "ORDER",
     "section": "출고 전 주문 취소",
-    "content": "주문 상태가 PAID 또는 PREPARING이면 출고 전 취소를 요청할 수 있습니다. PREPARING 상태는 담당자가 취소 가능 여부를 확인한 뒤 접수합니다.",
+    "content": "주문이 결제 완료 또는 상품 준비 중 단계라면 출고 전 취소를 요청할 수 있습니다. 상품 준비 중에는 출고 작업이 시작되었을 수 있으므로 담당자가 취소 가능 여부를 확인한 뒤 접수합니다.",
     "keywords": ["주문 취소", "출고 전", "취소 요청", "더 이상 필요", "상품 준비 중"],
     "ticketCategories": ["CANCELLATION", "ORDER_CHANGE"],
     "orderStatuses": ["PAID", "PREPARING"]

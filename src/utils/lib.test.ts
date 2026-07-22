@@ -2,10 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import evaluationCases from "@/data/ai-evaluation-cases.json";
 import ordersData from "@/data/orders.json";
+import policyIndex from "@/data/policy-search-index.json";
 import ticketsData from "@/data/tickets.json";
 import { mergeTicketState, searchPolicies } from "@/utils/lib";
 import { buildAiReq } from "@/utils/req";
-import type { Order, Ticket } from "@/utils/types";
+import type { Order, PolicySearchItem, Ticket } from "@/utils/types";
 
 const tickets = ticketsData as Ticket[];
 const orders = ordersData as Order[];
@@ -118,6 +119,25 @@ test("AI 요청은 문의·주문·검색 정책의 허용 필드만 포함한�
     ),
     true
   );
+});
+
+test("정책 본문에는 내부 주문 상태 코드를 노출하지 않는다", () => {
+  const statusCodes = [
+    "PAID",
+    "PREPARING",
+    "IN_TRANSIT",
+    "DELIVERED",
+    "CANCELLED",
+    "REFUNDED",
+  ];
+
+  for (const policy of policyIndex as PolicySearchItem[]) {
+    assert.equal(
+      statusCodes.some((code) => policy.content.includes(code)),
+      false,
+      `${policy.sectionId}: ${policy.content}`
+    );
+  }
 });
 
 test("저장 상태를 복원하면서 최신 문의 데이터와 신규 티켓을 유지한다", () => {
