@@ -12,11 +12,12 @@
 
 - `src/app`: Next.js 페이지와 서버 라우트입니다.
 - `src/components/dashboard`: 고객센터 대시보드 UI입니다.
-- `src/hooks`: TanStack Query 기반 클라이언트 서버 상태 훅입니다.
+- `src/hooks`: 화면 상태와 TanStack Query 기반 서버 상태를 관리하는 클라이언트 훅입니다.
 - `src/server`: OpenAI SDK를 사용하는 서버 전용 LLM 로직입니다.
-- `src/utils/ai-schemas.ts`: AI 요청·응답의 공통 Zod 스키마와 타입입니다.
+- `src/utils/schemas.ts`: AI 요청·응답의 공통 Zod 스키마와 타입입니다.
+- `src/utils/req.ts`: Axios 기반 클라이언트 API 요청 함수입니다.
 - `src/utils/types.ts`: 공통 도메인 타입입니다.
-- `src/utils/lib.ts`: 정책 검색 및 도메인 유틸리티입니다.
+- `src/utils/lib.ts`: 정책 검색, 저장 상태 병합, 스타일 조합 유틸리티입니다.
 - `src/data/policies`: 원본 정책 문서입니다.
 - `src/data/policy-search-index.json`: 검색용 정책 섹션입니다.
 - `docs/data-model.md`: 도메인 데이터 모델 문서입니다.
@@ -40,6 +41,15 @@
 - 소스 코드 import에는 `@/` 별칭을 사용합니다.
 - 기존 컴포넌트 구조와 Tailwind 스타일 작성 방식을 따릅니다.
 - 가능하면 도메인 로직을 화면 컴포넌트와 분리합니다.
+- 변수와 함수 이름은 보통 2~4개 단어 안에서 역할이 드러나게 작성하고, 같은 문맥이 반복되면 불필요한 접두사와 중복 단어를 제거합니다.
+- `req`, `res`, `max`, `min`, `len`, `ref`, `info`, `id`, `config`처럼 팀에서 의미를 바로 이해할 수 있는 축약어는 긴 식별자를 줄이는 데 사용할 수 있습니다. 한 글자 이름이나 도메인 의미가 사라지는 임의 축약은 피합니다.
+- 이벤트 핸들러는 `handle*`를 반복해서 붙이기보다 `saveDraft`, `approveTicket`, `closeDialog`처럼 동작을 직접 나타냅니다.
+- 페이지 파일은 라우트 진입점과 화면 조립에 집중합니다. 여러 컴포넌트가 공유하는 상태, 파생값, 저장 및 업무 동작은 해당 화면의 `use*` 훅으로 분리합니다.
+- 훅 파일은 훅 이름과 동일한 camelCase를 사용합니다. 예: `useDashboard.ts`, `useAiSuggestion.ts`.
+- 두 곳 이상에서 같은 의미와 스타일로 반복되는 버튼, 배지, 다이얼로그 같은 UI는 `src/components/common`의 공통 컴포넌트로 추출합니다.
+- 공통 컴포넌트는 도메인 상태를 직접 해석하지 않고 `variant`, `tone`, `size`와 같은 작은 표현 API를 제공합니다. 도메인 값과 UI 표현의 매핑은 사용하는 쪽이나 상수 모듈에 둡니다.
+- 컴포넌트는 화면 표현과 짧은 UI 상태만 소유합니다. `localStorage`, API 요청 조립, 처리 이력 생성처럼 업무 흐름에 해당하는 로직은 훅이나 유틸리티로 분리합니다.
+- `src/utils`는 `req.ts`, `types.ts`, `formatters.ts`, `constants.ts`, `schemas.ts`, `lib.ts`를 기본 구성으로 사용합니다. 기능이 작고 강하게 연관된 유틸리티는 새 파일을 만들기보다 기존 모듈에 함께 둡니다.
 - 확정성, 작업 효율성, 유지보수성 측면에서 기대 효과가 더 크다면 새로운 의존성 사용을 권장합니다.
 - 새로운 의존성을 추가할 때는 충분히 검증되고 현재 유지보수되고 있는 안전한 라이브러리인지 확인합니다.
 - 역할이 중복되는 라이브러리는 피하고, 각 의존성의 도입 목적을 명확히 합니다.
