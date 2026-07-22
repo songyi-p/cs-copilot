@@ -48,7 +48,7 @@ type AiSuggestion = {
     section: string;
     reason: string;
   }[];
-  recommendedAction: AiRecommendedAction;
+  recommendedAction: AiAction;
   confidenceScore: 1 | 2 | 3 | 4 | 5;
   confidenceReason: string;
   missingInformation: string[];

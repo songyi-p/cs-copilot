@@ -1,8 +1,4 @@
-import type {
-  ActionHistory,
-  AiConfidenceScore,
-  AiRecommendedAction,
-} from "@/utils/types";
+import type { ActionHistory, AiAction, AiScore } from "@/utils/types";
 
 export const categoryLabel: Record<string, string> = {
   DELIVERY_DELAY: "배송 지연",
@@ -41,7 +37,7 @@ export const aiDecisionLabel: Record<NonNullable<ActionHistory["aiDecision"]>, s
   REJECTED: "제안 미채택",
 };
 
-export const aiRecommendedActionLabel: Record<AiRecommendedAction, string> = {
+export const aiActionLabel: Record<AiAction, string> = {
   REFUND_REVIEW: "환불 가능 여부 검토",
   DELAY_COUPON: "배송 지연 쿠폰 발급 검토",
   EXCHANGE_REVIEW: "교환 가능 여부 검토",
@@ -57,10 +53,23 @@ export const aiRecommendedActionLabel: Record<AiRecommendedAction, string> = {
   ESCALATE: "담당자 이관 권장",
 };
 
-export const aiConfidenceLabel: Record<AiConfidenceScore, string> = {
+export const aiScoreLabel: Record<AiScore, string> = {
   1: "근거 부족",
   2: "추가 판단 필요",
   3: "외부 확인 필요",
   4: "근거 충분",
   5: "판단 명확",
+};
+
+// 화면 구조를 단계적으로 옮기는 동안 기존 import와 호환합니다.
+export const aiRecommendedActionLabel = aiActionLabel;
+export const aiConfidenceLabel = aiScoreLabel;
+
+type StatusTone = "open" | "review" | "escalated" | "resolved";
+
+export const statusTone: Record<string, StatusTone> = {
+  OPEN: "open",
+  IN_REVIEW: "review",
+  ESCALATED: "escalated",
+  RESOLVED: "resolved",
 };

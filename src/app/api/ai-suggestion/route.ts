@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import {
-  getAiErrorDiagnostics,
+  getAiDiagnostics,
   getAiErrorStatus,
-  parseAiSuggestionRequest,
+  parseAiReq,
   requestAiSuggestion,
 } from "@/server/ai-suggestion";
 
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
   let input;
   try {
-    input = parseAiSuggestionRequest(body);
+    input = parseAiReq(body);
   } catch {
     return NextResponse.json({ error: "AI 제안 요청 데이터가 올바르지 않습니다." }, { status: 400 });
   }
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     return NextResponse.json(suggestion);
   } catch (error) {
     const status = getAiErrorStatus(error);
-    const diagnostics = getAiErrorDiagnostics(error);
+    const diagnostics = getAiDiagnostics(error);
     console.error("[ai-suggestion] request failed", diagnostics);
     const message =
       status === 503
