@@ -4,6 +4,7 @@ import evaluationCases from "@/data/ai-evaluation-cases.json";
 import ordersData from "@/data/orders.json";
 import ticketsData from "@/data/tickets.json";
 import { mergeTicketState, searchPolicies } from "@/utils/lib";
+import { buildAiReq } from "@/utils/req";
 import type { Order, Ticket } from "@/utils/types";
 
 const tickets = ticketsData as Ticket[];
@@ -81,6 +82,42 @@ test("교환 문의에서 낮은 관련도의 불량 정책을 제외한다", ()
 
   assert.ok(results.some((result) => result.sectionId === "POL-RETURN-001-FEE"));
   assert.equal(results.some((result) => result.policyId === "POL-DEFECT-001"), false);
+});
+
+test("AI 요청은 문의·주문·검색 정책의 허용 필드만 포함한다", () => {
+  const ticket = tickets[0];
+  const order = orders.find((item) => item.orderId === ticket.orderId);
+  const policies = searchPolicies({
+    title: ticket.title,
+    inquiry: ticket.inquiry,
+    ticketCategory: ticket.category,
+    orderStatus: order?.orderStatus,
+  });
+  const req = buildAiReq(ticket, order, policies);
+
+  assert.deepEqual(Object.keys(req), [
+    "inquiryTitle",
+    "inquiryContent",
+    "ticketCategory",
+    "order",
+    "policies",
+  ]);
+  assert.deepEqual(Object.keys(req.order ?? {}), [
+    "orderId",
+    "productName",
+    "orderStatus",
+    "orderedAt",
+    "deliveryExpectedAt",
+    "deliveredAt",
+    "paymentAmount",
+  ]);
+  assert.equal(req.policies.length <= 3, true);
+  assert.equal(
+    req.policies.every((policy) =>
+      ["policyId", "section", "content"].every((key) => key in policy)
+    ),
+    true
+  );
 });
 
 test("저장 상태를 복원하면서 최신 문의 데이터와 신규 티켓을 유지한다", () => {

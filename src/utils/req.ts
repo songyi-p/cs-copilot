@@ -5,12 +5,39 @@ import {
   type AiSuggestion,
   type AiReq,
 } from "@/utils/schemas";
+import type { Order, PolicySearchResult, Ticket } from "@/utils/types";
 
 const errorResponseSchema = z.object({ error: z.string() });
 
 const apiClient = axios.create({
   headers: { "Content-Type": "application/json" },
   timeout: 100_000,
+});
+
+export const buildAiReq = (
+  ticket: Ticket,
+  order: Order | undefined,
+  policies: PolicySearchResult[]
+): AiReq => ({
+  inquiryTitle: ticket.title,
+  inquiryContent: ticket.inquiry,
+  ticketCategory: ticket.category,
+  order: order
+    ? {
+        orderId: order.orderId,
+        productName: order.productName,
+        orderStatus: order.orderStatus,
+        orderedAt: order.orderedAt,
+        deliveryExpectedAt: order.deliveryExpectedAt,
+        deliveredAt: order.deliveredAt,
+        paymentAmount: order.paymentAmount,
+      }
+    : null,
+  policies: policies.map(({ policyId, section, content }) => ({
+    policyId,
+    section,
+    content,
+  })),
 });
 
 export const getAiSuggestion = async (
