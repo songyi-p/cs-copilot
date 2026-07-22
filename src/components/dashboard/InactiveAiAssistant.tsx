@@ -17,15 +17,9 @@ export function InactiveAiAssistant({
           </p>
           <h2 className="m-0 text-[19px] font-bold tracking-[-0.5px]">처리 기록</h2>
         </div>
-        <span
-          className={
-            isResolved
-              ? "rounded-[3px] bg-status-resolved-bg px-1.75 py-1 text-[10px] font-bold text-status-resolved"
-              : "rounded-[3px] bg-status-escalated-bg px-1.75 py-1 text-[10px] font-bold text-status-escalated"
-          }
-        >
+        <Badge tone={isResolved ? "resolved" : "escalated"} className="py-1">
           {isResolved ? "처리 완료" : "이관됨"}
-        </span>
+        </Badge>
       </div>
 
       <div className="mb-5 rounded-md border border-[#dce2ea] bg-[#f7f9fc] px-3.5 py-3 text-xs leading-[1.6] text-muted">
@@ -54,3 +48,4 @@ export function InactiveAiAssistant({
     </aside>
   );
 }
+import { Badge } from "@/components/common/Badge";
