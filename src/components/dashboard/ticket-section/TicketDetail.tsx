@@ -1,14 +1,14 @@
+import { Badge } from "@/components/common/Badge";
 import type { ActionHistory, Customer, Order, Ticket } from "@/utils/types";
-import { aiDecisionLabel, categoryLabel, orderStatusLabel, statusLabel } from "@/utils/constants";
+import {
+  aiDecisionLabel,
+  categoryLabel,
+  orderStatusLabel,
+  statusLabel,
+  statusTone,
+} from "@/utils/constants";
 import { formatDate, formatDateTime } from "@/utils/formatters";
-import { cn } from "@/utils/cn";
-
-const statusStyles: Record<string, string> = {
-  OPEN: "bg-status-open-bg text-status-open",
-  IN_REVIEW: "bg-status-review-bg text-status-review",
-  ESCALATED: "bg-status-escalated-bg text-status-escalated",
-  RESOLVED: "bg-status-resolved-bg text-status-resolved",
-};
+import { cn } from "@/utils/lib";
 
 const cardClass = "rounded-lg border border-line bg-white";
 const detailRowClass = "flex justify-between py-1.75";
@@ -37,11 +37,13 @@ export function TicketDetail({
           </p>
           <h2 className="m-0 text-[22px] font-bold tracking-[-0.5px]">{ticket.title}</h2>
         </div>
-        <span className={cn("inline-block rounded-[3px] px-1.75 py-0.75 text-[10px] font-bold", statusStyles[ticket.status])}>{statusLabel[ticket.status]}</span>
+        <Badge tone={statusTone[ticket.status] ?? "neutral"}>
+          {statusLabel[ticket.status]}
+        </Badge>
       </div>
       <article className={cn(cardClass, "mb-3.5 flex items-center justify-between px-5 py-3.5")}>
         <div className="flex items-center gap-3">
-          <span className="grid size-9 place-items-center rounded-full bg-[#e8edff] text-sm font-extrabold text-[#526ad0]">
+          <span className="grid size-9 place-items-center rounded-full bg-status-open-bg text-sm font-extrabold text-status-open">
             {assigneeName.slice(0, 1)}
           </span>
           <div>
@@ -49,9 +51,9 @@ export function TicketDetail({
             <strong className="text-[13px]">{assigneeName}</strong>
           </div>
         </div>
-        <span className="rounded-[3px] bg-[#e8f7f0] px-2 py-1 text-[10px] font-bold text-[#3c8a6a]">
+        <Badge tone="success" className="px-2 py-1">
           담당 중
-        </span>
+        </Badge>
       </article>
       <article className={cn(cardClass, "mb-4.5 px-5 py-4.5")}>
         <p className="mb-2.25 text-[11px] font-extrabold text-label">
@@ -75,9 +77,9 @@ export function TicketDetail({
             <div className={detailRowClass}>
               <dt className={termClass}>등급</dt>
               <dd className={descriptionClass}>
-                <span className="rounded-[3px] bg-[#fff2df] px-1.5 py-0.5 text-[10px] text-[#a66c23]">
+                <Badge tone="warning" size="sm" className="font-normal">
                   {customer.grade}
-                </span>
+                </Badge>
               </dd>
             </div>
             <div className={detailRowClass}>
@@ -161,19 +163,25 @@ export function TicketDetail({
               >
                 <div className="mb-2 flex items-start justify-between gap-3">
                   <strong className="text-xs">{history.actionLabel ?? history.finalAction}</strong>
-                  {history.aiDecision && <span className="shrink-0 rounded-[3px] bg-status-resolved-bg px-1.5 py-0.5 text-[10px] font-bold text-status-resolved">{aiDecisionLabel[history.aiDecision]}</span>}
+                  {history.aiDecision && (
+                    <Badge tone="resolved" size="sm" className="shrink-0">
+                      {aiDecisionLabel[history.aiDecision]}
+                    </Badge>
+                  )}
                 </div>
                 {history.finalResponse && (
                   <p className="mb-2 whitespace-pre-wrap text-[11px] leading-[1.6] text-muted">
                     {history.finalResponse}
                   </p>
                 )}
-                {history.note && <p className="mb-2 text-[11px] leading-[1.6] text-muted">이관 메모: {history.note}</p>}
+                {history.note && (
+                  <p className="mb-2 text-[11px] leading-[1.6] text-muted">
+                    이관 메모: {history.note}
+                  </p>
+                )}
                 <p className="m-0 text-[10px] text-timestamp">
                   {history.agentId} · {formatDateTime(history.createdAt)}
-                  {history.aiConfidenceScore
-                    ? ` · AI 신뢰도 ${history.aiConfidenceScore}/5점`
-                    : ""}
+                  {history.aiConfidenceScore ? ` · AI 신뢰도 ${history.aiConfidenceScore}/5점` : ""}
                 </p>
               </div>
             ))}

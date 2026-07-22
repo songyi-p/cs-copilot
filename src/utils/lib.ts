@@ -1,5 +1,36 @@
-import type { PolicySearchItem, PolicySearchResult } from "@/utils/types";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+import type { PolicySearchItem, PolicySearchResult, Ticket } from "@/utils/types";
 import policySearchIndex from "@/data/policy-search-index.json";
+
+export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
+
+export type StoredTicketState = {
+  ticketId: string;
+  status?: string;
+  assigneeId?: string;
+};
+
+export const mergeTicketState = (
+  defaults: Ticket[],
+  stored: StoredTicketState[],
+  assigneeIds: string[]
+): Ticket[] => {
+  const storedById = new Map(stored.map((ticket) => [ticket.ticketId, ticket]));
+  const validIds = new Set(assigneeIds);
+
+  return defaults.map((ticket) => {
+    const saved = storedById.get(ticket.ticketId);
+    return {
+      ...ticket,
+      status: saved?.status ?? ticket.status,
+      assigneeId:
+        saved?.assigneeId && validIds.has(saved.assigneeId)
+          ? saved.assigneeId
+          : ticket.assigneeId,
+    };
+  });
+};
 
 const normalize = (value: string) => value.toLowerCase().replace(/\s+/g, " ").trim();
 const MIN_POLICY_SCORE = 20;
@@ -21,18 +52,18 @@ export const searchPolicies = (
   { title, inquiry, ticketCategory, orderStatus }: PolicySearchInput,
   limit = 3
 ): PolicySearchResult[] => {
-  const normalizedInquiry = normalize(`${title} ${inquiry}`);
-  const inquiryTerms = [...new Set(tokenize(normalizedInquiry))];
+  const normalizedText = normalize(`${title} ${inquiry}`);
+  const terms = [...new Set(tokenize(normalizedText))];
 
   return (policySearchIndex as PolicySearchItem[])
     .map((item) => {
       const matchedKeywords = item.keywords.filter((keyword) =>
-        normalizedInquiry.includes(normalize(keyword))
+        normalizedText.includes(normalize(keyword))
       );
-      const searchablePolicy = normalize(
+      const policyText = normalize(
         `${item.policyTitle} ${item.section} ${item.content} ${item.keywords.join(" ")}`
       );
-      const matchedTerms = inquiryTerms.filter((term) => searchablePolicy.includes(term));
+      const matchedTerms = terms.filter((term) => policyText.includes(term));
       const categoryScore = item.ticketCategories.includes(ticketCategory) ? 40 : 0;
       const orderStatusScore =
         orderStatus && item.orderStatuses.includes(orderStatus) ? 12 : 0;

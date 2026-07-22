@@ -1,14 +1,15 @@
-import type { AiConfidenceScore, AiPolicyReference } from "@/utils/ai-schemas";
+import type { AiScore, PolicyRef } from "@/utils/schemas";
 
 export type {
-  AiConfidenceScore,
-  AiOrderContext,
-  AiPolicyContext,
-  AiPolicyReference,
-  AiRecommendedAction,
+  AiAction,
+  AiReq,
+  AiScore,
   AiSuggestion,
-  AiSuggestionRequest,
-} from "@/utils/ai-schemas";
+  OrderContext,
+  OrderFacts,
+  PolicyContext,
+  PolicyRef,
+} from "@/utils/schemas";
 
 export type Ticket = {
   ticketId: string;
@@ -79,6 +80,6 @@ export type ActionHistory = {
   note?: string;
   fromAgentId?: string;
   toAgentId?: string;
-  aiConfidenceScore?: AiConfidenceScore;
-  policyReferences?: AiPolicyReference[];
+  aiConfidenceScore?: AiScore;
+  policyReferences?: PolicyRef[];
 };

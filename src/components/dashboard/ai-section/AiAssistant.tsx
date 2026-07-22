@@ -1,9 +1,11 @@
-import type { AiConfidenceScore, AiSuggestion } from "@/utils/types";
-import { aiConfidenceLabel, aiRecommendedActionLabel } from "@/utils/constants";
-import { cn } from "@/utils/cn";
+import { Badge } from "@/components/common/Badge";
+import { Button } from "@/components/common/Button";
+import type { AiScore, AiSuggestion } from "@/utils/types";
+import { aiActionLabel, aiScoreLabel } from "@/utils/constants";
+import { cn } from "@/utils/lib";
 
 const sectionLabelClass = "mb-2.75 text-[13px] font-extrabold text-label";
-const confidenceStyles: Record<AiConfidenceScore, string> = {
+const scoreStyles: Record<AiScore, string> = {
   1: "bg-status-escalated-bg text-status-escalated",
   2: "bg-status-escalated-bg text-status-escalated",
   3: "bg-status-review-bg text-status-review",
@@ -30,7 +32,7 @@ export function AiAssistant({
 }) {
   const response = draft || suggestion?.replyDraft || "";
   const displayedAction = suggestion
-    ? aiRecommendedActionLabel[suggestion.recommendedAction]
+    ? aiActionLabel[suggestion.recommendedAction]
     : "AI 제안을 기다리는 중입니다.";
 
   return (
@@ -53,13 +55,9 @@ export function AiAssistant({
       {status === "error" && (
         <div className="mb-5 rounded-md border border-[#f0cccc] bg-[#fff7f7] px-3.5 py-3">
           <p className="m-0 text-xs font-semibold text-status-escalated">{error}</p>
-          <button
-            className="mt-2 rounded border border-[#e2b6b6] bg-white px-2.5 py-1.5 text-[11px] font-bold text-status-escalated"
-            onClick={onRetry}
-            type="button"
-          >
+          <Button className="mt-2 border-[#e2b6b6] px-2.5 py-1.5 text-[11px] text-status-escalated" onClick={onRetry}>
             다시 시도
-          </button>
+          </Button>
         </div>
       )}
 
@@ -70,18 +68,19 @@ export function AiAssistant({
             {suggestion && <span className="ml-1.5 font-semibold text-[#7790de]">AI 생성</span>}
           </span>
           {suggestion ? (
-            <span
+            <Badge
+              tone="neutral"
               className={cn(
-                "shrink-0 rounded-[3px] px-1.75 py-1 text-[10px] font-bold",
-                confidenceStyles[suggestion.confidenceScore]
+                "shrink-0 py-1",
+                scoreStyles[suggestion.confidenceScore]
               )}
             >
-              {suggestion.confidenceScore}/5점 · {aiConfidenceLabel[suggestion.confidenceScore]}
-            </span>
+              {suggestion.confidenceScore}/5점 · {aiScoreLabel[suggestion.confidenceScore]}
+            </Badge>
           ) : (
-            <span className="shrink-0 rounded-[3px] bg-[#eef1f5] px-1.75 py-1 text-[10px] font-bold text-faint">
+            <Badge tone="neutral" className="shrink-0 py-1 text-faint">
               {status === "loading" ? "생성 중" : "생성 실패"}
-            </span>
+            </Badge>
           )}
         </div>
         {!canEdit && (

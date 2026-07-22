@@ -3,8 +3,9 @@ import { z } from "zod";
 import {
   aiSuggestionSchema,
   type AiSuggestion,
-  type AiSuggestionRequest,
-} from "@/utils/ai-schemas";
+  type AiReq,
+} from "@/utils/schemas";
+import type { Order, PolicySearchResult, Ticket } from "@/utils/types";
 
 const errorResponseSchema = z.object({ error: z.string() });
 
@@ -13,13 +14,39 @@ const apiClient = axios.create({
   timeout: 100_000,
 });
 
+export const buildAiReq = (
+  ticket: Ticket,
+  order: Order | undefined,
+  policies: PolicySearchResult[]
+): AiReq => ({
+  inquiryTitle: ticket.title,
+  inquiryContent: ticket.inquiry,
+  ticketCategory: ticket.category,
+  order: order
+    ? {
+        orderId: order.orderId,
+        productName: order.productName,
+        orderStatus: order.orderStatus,
+        orderedAt: order.orderedAt,
+        deliveryExpectedAt: order.deliveryExpectedAt,
+        deliveredAt: order.deliveredAt,
+        paymentAmount: order.paymentAmount,
+      }
+    : null,
+  policies: policies.map(({ policyId, section, content }) => ({
+    policyId,
+    section,
+    content,
+  })),
+});
+
 export const getAiSuggestion = async (
-  request: AiSuggestionRequest,
+  req: AiReq,
   signal?: AbortSignal
 ): Promise<AiSuggestion> => {
   try {
-    const response = await apiClient.post<unknown>("/api/ai-suggestion", request, { signal });
-    return aiSuggestionSchema.parse(response.data);
+    const res = await apiClient.post<unknown>("/api/ai-suggestion", req, { signal });
+    return aiSuggestionSchema.parse(res.data);
   } catch (error: unknown) {
     if (axios.isCancel(error)) throw error;
 

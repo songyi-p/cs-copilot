@@ -1,14 +1,9 @@
+import { Badge } from "@/components/common/Badge";
+import { Button } from "@/components/common/Button";
 import type { Customer, Ticket } from "@/utils/types";
-import { categoryLabel, statusLabel } from "@/utils/constants";
+import { categoryLabel, statusLabel, statusTone } from "@/utils/constants";
 import { formatDate } from "@/utils/formatters";
-import { cn } from "@/utils/cn";
-
-const statusStyles: Record<string, string> = {
-  OPEN: "bg-status-open-bg text-status-open",
-  IN_REVIEW: "bg-status-review-bg text-status-review",
-  ESCALATED: "bg-status-escalated-bg text-status-escalated",
-  RESOLVED: "bg-status-resolved-bg text-status-resolved",
-};
+import { cn } from "@/utils/lib";
 
 export function TicketList({
   tickets,
@@ -32,12 +27,9 @@ export function TicketList({
             문의 목록 <span className="align-middle text-xs text-[#98a3b5]">{tickets.length}</span>
           </h1>
         </div>
-        <button
-          className="size-7.5 rounded-md border border-line bg-white text-[#778398]"
-          aria-label="필터"
-        >
+        <Button variant="ghost" size="icon" aria-label="필터">
           ☷
-        </button>
+        </Button>
       </div>
       <div className="mx-4 mb-3.25 h-8.75 rounded-md bg-canvas px-2.75 py-2 text-xs text-[#a0aabb]">
         ⌕ <span className="pl-1.5">문의 검색</span>
@@ -62,14 +54,9 @@ export function TicketList({
                 {ticket.title}
               </p>
               <div className="flex items-center gap-1.75 text-[10px] text-[#8490a0]">
-                <span
-                  className={cn(
-                    "inline-block rounded-[3px] bg-[#edf1f5] px-1.75 py-0.75 text-[10px] font-bold text-[#738093]",
-                    statusStyles[ticket.status]
-                  )}
-                >
+                <Badge tone={statusTone[ticket.status] ?? "neutral"}>
                   {statusLabel[ticket.status]}
-                </span>
+                </Badge>
                 <span>{categoryLabel[ticket.category]}</span>
               </div>
             </button>
