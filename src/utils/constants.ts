@@ -61,10 +61,6 @@ export const aiScoreLabel: Record<AiScore, string> = {
   5: "판단 명확",
 };
 
-// 화면 구조를 단계적으로 옮기는 동안 기존 import와 호환합니다.
-export const aiRecommendedActionLabel = aiActionLabel;
-export const aiConfidenceLabel = aiScoreLabel;
-
 type StatusTone = "open" | "review" | "escalated" | "resolved";
 
 export const statusTone: Record<string, StatusTone> = {

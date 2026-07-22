@@ -2,17 +2,13 @@ import type { AiScore, PolicyRef } from "@/utils/schemas";
 
 export type {
   AiAction,
-  AiAction as AiRecommendedAction,
   AiReq,
-  AiReq as AiSuggestionRequest,
   AiScore,
-  AiScore as AiConfidenceScore,
   AiSuggestion,
   OrderContext,
   OrderFacts,
   PolicyContext,
   PolicyRef,
-  PolicyRef as AiPolicyReference,
 } from "@/utils/schemas";
 
 export type Ticket = {
