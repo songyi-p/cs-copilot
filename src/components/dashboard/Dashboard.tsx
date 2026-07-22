@@ -1,12 +1,12 @@
 "use client";
 
 import { Toast } from "@/components/common/Toast";
-import { ActionBar } from "@/components/dashboard/ActionBar";
-import { AiAssistant } from "@/components/dashboard/AiAssistant";
+import { ActionFooter } from "@/components/dashboard/ActionFooter";
+import { AiAssistant } from "@/components/dashboard/ai-section/AiAssistant";
 import { AppHeader } from "@/components/dashboard/AppHeader";
-import { InactiveAiAssistant } from "@/components/dashboard/InactiveAiAssistant";
-import { TicketDetail } from "@/components/dashboard/TicketDetail";
-import { TicketList } from "@/components/dashboard/TicketList";
+import { InactiveAiAssistant } from "@/components/dashboard/ai-section/InactiveAiAssistant";
+import { TicketDetail } from "@/components/dashboard/ticket-section/TicketDetail";
+import { TicketList } from "@/components/dashboard/ticket-section/TicketList";
 import { useDashboard } from "@/hooks/useDashboard";
 
 export function Dashboard() {
@@ -46,7 +46,7 @@ export function Dashboard() {
           />
         )}
       </section>
-      <ActionBar
+      <ActionFooter
         onSaveDraft={desk.saveDraft}
         onTransfer={desk.transferTicket}
         onApprove={desk.approveTicket}
@@ -54,9 +54,7 @@ export function Dashboard() {
         canEdit={desk.canEdit}
         canSaveDraft={Boolean(desk.draft.trim() || desk.suggestion?.replyDraft)}
         canApprove={Boolean(desk.suggestion)}
-        transferTargets={desk.agents.filter(
-          (item) => item.agentId !== desk.ticket.assigneeId
-        )}
+        transferTargets={desk.agents.filter((item) => item.agentId !== desk.ticket.assigneeId)}
       />
       <Toast message={desk.notice} onClose={desk.closeNotice} />
     </main>

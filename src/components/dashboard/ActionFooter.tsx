@@ -4,7 +4,7 @@ import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { TransferDialog } from "@/components/dashboard/TransferDialog";
 import type { Agent } from "@/utils/types";
 
-export function ActionBar({
+export function ActionFooter({
   onSaveDraft,
   onTransfer,
   onApprove,

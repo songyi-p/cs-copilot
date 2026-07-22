@@ -1,3 +1,5 @@
+import { Badge } from "@/components/common/Badge";
+
 export function InactiveAiAssistant({
   mode,
   response,
@@ -48,4 +50,3 @@ export function InactiveAiAssistant({
     </aside>
   );
 }
-import { Badge } from "@/components/common/Badge";
