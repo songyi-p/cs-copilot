@@ -11,10 +11,13 @@ import {
   transferTicketToAgent,
 } from "@/utils/req";
 import type {
+  ActionHistory,
   Agent,
   AiSuggestion,
   SavedSuggestion,
   Ticket,
+  TicketDetailData,
+  TicketListData,
 } from "@/utils/types";
 
 const toSavedSuggestion = (suggestion: AiSuggestion): SavedSuggestion => ({
@@ -31,21 +34,21 @@ export function useTicketWorkspace(currentAgent: Agent) {
   const [notice, setNotice] = useState("");
   const [noticeTone, setNoticeTone] = useState<"success" | "error">("success");
 
-  const ticketsQuery = useQuery({
+  const ticketsQuery = useQuery<TicketListData>({
     queryKey: ["tickets"],
     queryFn: ({ signal }) => getTickets(signal),
   });
-  const agentsQuery = useQuery({
+  const agentsQuery = useQuery<Agent[]>({
     queryKey: ["agents"],
     queryFn: ({ signal }) => getAgents(signal),
   });
 
-  const tickets = ticketsQuery.data?.tickets ?? [];
+  const tickets: Ticket[] = ticketsQuery.data?.tickets ?? [];
   const selectedId =
-    activeId && tickets.some((item) => item.ticketId === activeId)
+    activeId && tickets.some((item: Ticket) => item.ticketId === activeId)
       ? activeId
       : tickets[0]?.ticketId ?? "";
-  const detailQuery = useQuery({
+  const detailQuery = useQuery<TicketDetailData>({
     queryKey: ["ticket", selectedId],
     queryFn: ({ signal }) => getTicketDetail(selectedId, signal),
     enabled: Boolean(selectedId),
@@ -57,8 +60,8 @@ export function useTicketWorkspace(currentAgent: Agent) {
       : undefined;
   const ticket = detail?.ticket;
   const assignee = detail?.assignee;
-  const agents = agentsQuery.data ?? [];
-  const ticketHistory = detail?.histories ?? [];
+  const agents: Agent[] = agentsQuery.data ?? [];
+  const ticketHistory: ActionHistory[] = detail?.histories ?? [];
   const canEdit = Boolean(
     ticket &&
       (currentAgent.role === "ADMIN" ||
@@ -69,7 +72,8 @@ export function useTicketWorkspace(currentAgent: Agent) {
     ticket.status === "RESOLVED" ||
     ticket.status === "ESCALATED";
   const savedReply =
-    ticketHistory.find((item) => item.finalResponse)?.finalResponse ?? "";
+    ticketHistory.find((item: ActionHistory) => item.finalResponse)
+      ?.finalResponse ?? "";
 
   useEffect(() => {
     setDraft(detail?.draft ?? "");

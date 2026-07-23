@@ -131,7 +131,7 @@ export function Dashboard({ currentAgent }: { currentAgent: Agent }) {
         canApprove={Boolean(desk.suggestion)}
         isPending={desk.isMutating}
         transferTargets={desk.agents.filter(
-          (item) => item.agentId !== ticket.assigneeId
+          (item: Agent) => item.agentId !== ticket.assigneeId
         )}
       />
       <Toast
