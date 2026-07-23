@@ -5,30 +5,32 @@ import { useAiSuggestion } from "@/hooks/useAiSuggestion";
 import { useTicketWorkspace } from "@/hooks/useTicketWorkspace";
 import { searchPolicies } from "@/utils/lib";
 import { buildAiReq } from "@/utils/req";
-import type { Customer, Order } from "@/utils/types";
-import customerData from "@/data/customers.json";
-import orderData from "@/data/orders.json";
+import type { Agent } from "@/utils/types";
 
-const customers = customerData as Customer[];
-const orders = orderData as Order[];
-
-export function useDashboard() {
-  const workspace = useTicketWorkspace();
-  const { ticket } = workspace;
-  const customer = customers.find((item) => item.customerId === ticket.customerId)!;
-  const order = orders.find((item) => item.orderId === ticket.orderId);
+export function useDashboard(currentAgent: Agent) {
+  const workspace = useTicketWorkspace(currentAgent);
+  const { ticket, order } = workspace;
   const policies = useMemo(
     () =>
-      searchPolicies({
-        title: ticket.title,
-        inquiry: ticket.inquiry,
-        ticketCategory: ticket.category,
-        orderStatus: order?.orderStatus,
-      }),
-    [order?.orderStatus, ticket.category, ticket.inquiry, ticket.title]
+      ticket
+        ? searchPolicies({
+            title: ticket.title,
+            inquiry: ticket.inquiry,
+            ticketCategory: ticket.category,
+            orderStatus: order?.orderStatus,
+          })
+        : [],
+    [order?.orderStatus, ticket]
   );
-  const aiReq = useMemo(() => buildAiReq(ticket, order, policies), [order, policies, ticket]);
-  const aiQuery = useAiSuggestion(ticket.ticketId, aiReq, !workspace.aiDisabled);
+  const aiReq = useMemo(
+    () => (ticket ? buildAiReq(ticket, order, policies) : undefined),
+    [order, policies, ticket]
+  );
+  const aiQuery = useAiSuggestion(
+    ticket?.ticketId ?? "",
+    aiReq,
+    Boolean(ticket && !workspace.aiDisabled)
+  );
   const suggestion = workspace.aiDisabled ? undefined : aiQuery.data;
   const aiStatus: "loading" | "error" | "success" = aiQuery.isFetching
     ? "loading"
@@ -38,9 +40,6 @@ export function useDashboard() {
 
   return {
     ...workspace,
-    customers,
-    customer,
-    order,
     suggestion,
     aiStatus,
     aiError: aiQuery.isError ? aiQuery.error.message : "",

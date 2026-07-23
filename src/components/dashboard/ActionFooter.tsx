@@ -12,6 +12,7 @@ export function ActionFooter({
   canEdit,
   canSaveDraft,
   canApprove,
+  isPending,
   transferTargets,
 }: {
   onSaveDraft: () => void;
@@ -21,6 +22,7 @@ export function ActionFooter({
   canEdit: boolean;
   canSaveDraft: boolean;
   canApprove: boolean;
+  isPending: boolean;
   transferTargets: Agent[];
 }) {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -38,7 +40,7 @@ export function ActionFooter({
           <Button
             className="max-mobile:px-2.5 max-mobile:py-2"
             onClick={onSaveDraft}
-            disabled={!canEdit || !canSaveDraft || isResolved}
+            disabled={!canEdit || !canSaveDraft || isResolved || isPending}
           >
             임시 저장
           </Button>
@@ -46,7 +48,7 @@ export function ActionFooter({
             variant="accent"
             className="max-mobile:px-2.5 max-mobile:py-2"
             onClick={() => setIsTransferOpen(true)}
-            disabled={!canEdit || isResolved}
+            disabled={!canEdit || isResolved || isPending}
           >
             담당자 이관
           </Button>
@@ -54,10 +56,10 @@ export function ActionFooter({
             variant="primary"
             className="pr-3.75 pl-4.5 max-mobile:px-2.5 max-mobile:py-2"
             onClick={() => setIsConfirmOpen(true)}
-            disabled={!canEdit || !canApprove || isResolved}
+            disabled={!canEdit || !canApprove || isResolved || isPending}
             trailingIcon="→"
           >
-            {isResolved ? "처리 완료" : "답변 승인"}
+            {isPending ? "처리 중" : isResolved ? "처리 완료" : "답변 승인"}
           </Button>
         </div>
       </footer>

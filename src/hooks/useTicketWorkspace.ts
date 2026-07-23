@@ -1,200 +1,222 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { aiActionLabel } from "@/utils/constants";
-import { mergeTicketState, type StoredTicketState } from "@/utils/lib";
-import type { ActionHistory, Agent, AiSuggestion, Ticket } from "@/utils/types";
-import historyData from "@/data/action-history.json";
-import ticketData from "@/data/tickets.json";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  approveTicketResponse,
+  getAgents,
+  getTicketDetail,
+  getTickets,
+  saveTicketDraft,
+  transferTicketToAgent,
+} from "@/utils/req";
+import type {
+  Agent,
+  AiSuggestion,
+  SavedSuggestion,
+  Ticket,
+} from "@/utils/types";
 
-const agents: Agent[] = [
-  { agentId: "agent-yoon", name: "윤서연", role: "AGENT" },
-  { agentId: "agent-lee", name: "이수진", role: "AGENT" },
-  { agentId: "agent-park", name: "박준호", role: "ADMIN" },
-];
+const toSavedSuggestion = (suggestion: AiSuggestion): SavedSuggestion => ({
+  replyDraft: suggestion.replyDraft,
+  recommendedAction: suggestion.recommendedAction,
+  confidenceScore: suggestion.confidenceScore,
+  policyReferences: suggestion.policyReferences,
+});
 
-const agent = agents[0];
-const initialHistory = historyData as ActionHistory[];
-const initialTickets = (ticketData as Ticket[]).map((ticket) => ({
-  ...ticket,
-  assigneeId: ticket.ticketId === "TKT-1004" ? "agent-lee" : agent.agentId,
-}));
-
-const storageKey = {
-  history: "cs-copilot-action-history",
-  tickets: "cs-copilot-tickets",
-  drafts: "cs-copilot-drafts",
-};
-
-export function useTicketWorkspace() {
-  const [tickets, setTickets] = useState(initialTickets);
-  const [history, setHistory] = useState(initialHistory);
-  const [activeId, setActiveId] = useState(initialTickets[0].ticketId);
+export function useTicketWorkspace(currentAgent: Agent) {
+  const queryClient = useQueryClient();
+  const [activeId, setActiveId] = useState("");
   const [draft, setDraft] = useState("");
-  const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState("");
+  const [noticeTone, setNoticeTone] = useState<"success" | "error">("success");
 
-  const ticket = useMemo(
-    () => tickets.find((item) => item.ticketId === activeId)!,
-    [activeId, tickets]
+  const ticketsQuery = useQuery({
+    queryKey: ["tickets"],
+    queryFn: ({ signal }) => getTickets(signal),
+  });
+  const agentsQuery = useQuery({
+    queryKey: ["agents"],
+    queryFn: ({ signal }) => getAgents(signal),
+  });
+
+  const tickets = ticketsQuery.data?.tickets ?? [];
+  const selectedId =
+    activeId && tickets.some((item) => item.ticketId === activeId)
+      ? activeId
+      : tickets[0]?.ticketId ?? "";
+  const detailQuery = useQuery({
+    queryKey: ["ticket", selectedId],
+    queryFn: ({ signal }) => getTicketDetail(selectedId, signal),
+    enabled: Boolean(selectedId),
+  });
+
+  const detail =
+    detailQuery.data?.ticket.ticketId === selectedId
+      ? detailQuery.data
+      : undefined;
+  const ticket = detail?.ticket;
+  const assignee = detail?.assignee;
+  const agents = agentsQuery.data ?? [];
+  const ticketHistory = detail?.histories ?? [];
+  const canEdit = Boolean(
+    ticket &&
+      (currentAgent.role === "ADMIN" ||
+        ticket.assigneeId === currentAgent.agentId)
   );
-  const ticketHistory = useMemo(
-    () =>
-      history
-        .filter((item) => item.ticketId === ticket.ticketId)
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-    [history, ticket.ticketId]
-  );
-  const assignee = agents.find((item) => item.agentId === ticket.assigneeId)!;
-  const canEdit = agent.role === "ADMIN" || ticket.assigneeId === agent.agentId;
-  const aiDisabled = ticket.status === "RESOLVED" || ticket.status === "ESCALATED";
-  const savedReply = ticketHistory.find((item) => item.finalResponse)?.finalResponse ?? "";
-
-  const saveTickets = (next: Ticket[]) => {
-    setTickets(next);
-    window.localStorage.setItem(storageKey.tickets, JSON.stringify(next));
-  };
-
-  const saveHistory = (next: ActionHistory[]) => {
-    setHistory(next);
-    window.localStorage.setItem(storageKey.history, JSON.stringify(next));
-  };
-
-  const saveDrafts = (next: Record<string, string>) => {
-    setDrafts(next);
-    window.localStorage.setItem(storageKey.drafts, JSON.stringify(next));
-  };
+  const aiDisabled =
+    !ticket ||
+    ticket.status === "RESOLVED" ||
+    ticket.status === "ESCALATED";
+  const savedReply =
+    ticketHistory.find((item) => item.finalResponse)?.finalResponse ?? "";
 
   useEffect(() => {
-    const savedHistory = window.localStorage.getItem(storageKey.history);
-    const savedTickets = window.localStorage.getItem(storageKey.tickets);
-    const savedDrafts = window.localStorage.getItem(storageKey.drafts);
+    setDraft(detail?.draft ?? "");
+  }, [detail?.draft, selectedId]);
 
-    try {
-      if (savedHistory) setHistory(JSON.parse(savedHistory) as ActionHistory[]);
-      if (savedTickets) {
-        setTickets(
-          mergeTicketState(
-            initialTickets,
-            JSON.parse(savedTickets) as StoredTicketState[],
-            agents.map((item) => item.agentId)
-          )
-        );
-      }
-      if (savedDrafts) {
-        const parsed = JSON.parse(savedDrafts) as Record<string, string>;
-        setDrafts(parsed);
-        setDraft(parsed[initialTickets[0].ticketId] ?? "");
-      }
-    } catch {
-      Object.values(storageKey).forEach((key) => window.localStorage.removeItem(key));
-    }
-  }, []);
+  const showResult = (message: string, tone: "success" | "error") => {
+    setNotice(message);
+    setNoticeTone(tone);
+  };
+
+  const refreshWorkspace = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["tickets"] }),
+      queryClient.invalidateQueries({ queryKey: ["ticket"] }),
+    ]);
+  };
+
+  const draftMutation = useMutation({
+    mutationFn: ({
+      ticketId,
+      draftContent,
+      suggestion,
+    }: {
+      ticketId: string;
+      draftContent: string;
+      suggestion?: AiSuggestion;
+    }) =>
+      saveTicketDraft(ticketId, {
+        draft: draftContent,
+        suggestion: suggestion ? toSavedSuggestion(suggestion) : undefined,
+      }),
+    onSuccess: async (result, variables) => {
+      showResult(result.message, "success");
+      await queryClient.invalidateQueries({
+        queryKey: ["ticket", variables.ticketId],
+      });
+    },
+    onError: (error: Error) => showResult(error.message, "error"),
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: ({
+      ticketId,
+      suggestion,
+    }: {
+      ticketId: string;
+      suggestion: AiSuggestion;
+    }) =>
+      approveTicketResponse(ticketId, {
+        finalResponse: draft || suggestion.replyDraft,
+        suggestion: toSavedSuggestion(suggestion),
+      }),
+    onSuccess: async (result) => {
+      showResult(result.message, "success");
+      await refreshWorkspace();
+    },
+    onError: (error: Error) => showResult(error.message, "error"),
+  });
+
+  const transferMutation = useMutation({
+    mutationFn: ({
+      ticketId,
+      toAgentId,
+      note,
+      suggestion,
+    }: {
+      ticketId: string;
+      toAgentId: string;
+      note: string;
+      suggestion?: AiSuggestion;
+    }) =>
+      transferTicketToAgent(ticketId, {
+        toAgentId,
+        note,
+        draft: draft || suggestion?.replyDraft || "",
+        suggestion: suggestion ? toSavedSuggestion(suggestion) : undefined,
+      }),
+    onSuccess: async (result) => {
+      showResult(result.message, "success");
+      await refreshWorkspace();
+    },
+    onError: (error: Error) => showResult(error.message, "error"),
+  });
 
   const selectTicket = (next: Ticket) => {
     setActiveId(next.ticketId);
-    setDraft(drafts[next.ticketId] ?? "");
     setNotice("");
   };
 
-  const approveTicket = (suggestion?: AiSuggestion) => {
-    if (!canEdit || ticket.status === "RESOLVED" || !suggestion) return;
-
-    const original = suggestion.replyDraft;
-    const finalReply = draft || original;
-    const entry: ActionHistory = {
-      historyId: `HIS-${Date.now()}`,
-      ticketId: ticket.ticketId,
-      suggestedAction: suggestion.recommendedAction,
-      finalAction: "APPROVED_RESPONSE",
-      actionLabel: aiActionLabel[suggestion.recommendedAction],
-      eventType: "RESPONSE_APPROVED",
-      aiDecision: finalReply === original ? "ADOPTED" : "EDITED",
-      agentId: "데모 담당자",
-      createdAt: new Date().toISOString(),
-      finalResponse: finalReply,
-      aiConfidenceScore: suggestion.confidenceScore,
-      policyReferences: suggestion.policyReferences,
-    };
-    const nextHistory = [entry, ...history];
-    const nextTickets = tickets.map((item) =>
-      item.ticketId === ticket.ticketId ? { ...item, status: "RESOLVED" } : item
-    );
-
-    saveHistory(nextHistory);
-    saveTickets(nextTickets);
-    setNotice("답변이 승인되었습니다.");
-  };
-
   const saveDraft = (suggestion?: AiSuggestion) => {
-    if (!canEdit || ticket.status === "RESOLVED") return;
+    if (!ticket || !canEdit || ticket.status === "RESOLVED") return;
     const finalDraft = draft || suggestion?.replyDraft || "";
+
     if (!finalDraft.trim()) {
-      setNotice("저장할 답변 초안을 입력해 주세요.");
+      showResult("저장할 답변 초안을 입력해 주세요.", "error");
       return;
     }
 
-    const nextDrafts = { ...drafts, [ticket.ticketId]: finalDraft };
-    const entry: ActionHistory = {
-      historyId: `HIS-${Date.now()}`,
+    if (!draft) setDraft(finalDraft);
+    draftMutation.mutate({
       ticketId: ticket.ticketId,
-      suggestedAction: suggestion?.recommendedAction ?? "MANUAL_REVIEW",
-      finalAction: "DRAFT_SAVED",
-      actionLabel: "답변 초안 저장",
-      eventType: "DRAFT_SAVED",
-      agentId: agent.agentId,
-      createdAt: new Date().toISOString(),
-      finalResponse: finalDraft,
-      aiConfidenceScore: suggestion?.confidenceScore,
-      policyReferences: suggestion?.policyReferences,
-    };
-
-    setDraft(finalDraft);
-    saveDrafts(nextDrafts);
-    saveHistory([entry, ...history]);
-    setNotice("답변 초안이 저장되었습니다.");
+      draftContent: finalDraft,
+      suggestion,
+    });
   };
 
-  const transferTicket = (agentId: string, note: string, suggestion?: AiSuggestion) => {
-    if (!canEdit || ticket.status === "RESOLVED") return;
-    const finalDraft = draft || suggestion?.replyDraft || "";
-    const nextDrafts = finalDraft ? { ...drafts, [ticket.ticketId]: finalDraft } : drafts;
-    const nextTickets = tickets.map((item) =>
-      item.ticketId === ticket.ticketId
-        ? { ...item, assigneeId: agentId, status: "ESCALATED" }
-        : item
-    );
-    const nextAgent = agents.find((item) => item.agentId === agentId);
-    const entry: ActionHistory = {
-      historyId: `HIS-${Date.now()}`,
+  const approveTicket = (suggestion?: AiSuggestion) => {
+    if (!ticket || !canEdit || !suggestion) return;
+    approveMutation.mutate({
       ticketId: ticket.ticketId,
-      suggestedAction: suggestion?.recommendedAction ?? "ESCALATE",
-      finalAction: "ESCALATE",
-      actionLabel: `${agent.name} → ${nextAgent?.name} 담당자 이관`,
-      eventType: "ESCALATED",
-      agentId: agent.agentId,
-      fromAgentId: agent.agentId,
+      suggestion,
+    });
+  };
+
+  const transferTicket = (
+    agentId: string,
+    note: string,
+    suggestion?: AiSuggestion
+  ) => {
+    if (!ticket || !canEdit || ticket.status === "RESOLVED") return;
+    transferMutation.mutate({
+      ticketId: ticket.ticketId,
       toAgentId: agentId,
       note,
-      createdAt: new Date().toISOString(),
-      aiConfidenceScore: suggestion?.confidenceScore,
-      policyReferences: suggestion?.policyReferences,
-    };
-
-    setDraft(finalDraft);
-    saveDrafts(nextDrafts);
-    saveTickets(nextTickets);
-    saveHistory([entry, ...history]);
-    setNotice(
-      finalDraft
-        ? "답변 초안과 함께 담당자에게 이관했습니다."
-        : "답변 초안 없이 담당자에게 이관했습니다."
-    );
+      suggestion,
+    });
   };
+
+  const workspaceError =
+    ticketsQuery.error ?? agentsQuery.error ?? detailQuery.error;
+  const workspaceStatus: "loading" | "error" | "empty" | "success" =
+    ticketsQuery.isPending || agentsQuery.isPending
+      ? "loading"
+      : workspaceError
+        ? "error"
+        : tickets.length === 0
+          ? "empty"
+          : detailQuery.isPending || !detail
+            ? "loading"
+            : "success";
 
   return {
     tickets,
+    customers: ticketsQuery.data?.customers ?? [],
     ticket,
+    customer: detail?.customer,
+    order: detail?.order,
     ticketHistory,
     assignee,
     agents,
@@ -203,8 +225,25 @@ export function useTicketWorkspace() {
     savedReply,
     draft,
     notice,
+    noticeTone,
+    workspaceStatus,
+    workspaceError:
+      workspaceError instanceof Error
+        ? workspaceError.message
+        : "문의 데이터를 불러오지 못했습니다.",
+    isMutating:
+      draftMutation.isPending ||
+      approveMutation.isPending ||
+      transferMutation.isPending,
     setDraft,
     closeNotice: () => setNotice(""),
+    retryWorkspace: () => {
+      void Promise.all([
+        ticketsQuery.refetch(),
+        agentsQuery.refetch(),
+        detailQuery.refetch(),
+      ]);
+    },
     selectTicket,
     saveDraft,
     approveTicket,

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 type ToastProps = {
   message: string;
-  tone?: "success" | "info";
+  tone?: "success" | "info" | "error";
   duration?: number;
   onClose?: () => void;
 };
@@ -10,6 +10,7 @@ type ToastProps = {
 const toneStyles = {
   success: "border-[#cde8dc] text-[#348264]",
   info: "border-[#d8e0fb] text-[#526ad0]",
+  error: "border-[#f0cccc] text-status-escalated",
 };
 
 export function Toast({ message, tone = "success", duration = 2500, onClose }: ToastProps) {
@@ -28,7 +29,7 @@ export function Toast({ message, tone = "success", duration = 2500, onClose }: T
       role="status"
       aria-live="polite"
     >
-      {tone === "success" ? "✓ " : ""}
+      {tone === "success" ? "✓ " : tone === "error" ? "! " : ""}
       {message}
     </div>
   );

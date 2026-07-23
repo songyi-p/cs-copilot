@@ -1,36 +1,9 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import type { PolicySearchItem, PolicySearchResult, Ticket } from "@/utils/types";
+import type { PolicySearchItem, PolicySearchResult } from "@/utils/types";
 import policySearchIndex from "@/data/policy-search-index.json";
 
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
-
-export type StoredTicketState = {
-  ticketId: string;
-  status?: string;
-  assigneeId?: string;
-};
-
-export const mergeTicketState = (
-  defaults: Ticket[],
-  stored: StoredTicketState[],
-  assigneeIds: string[]
-): Ticket[] => {
-  const storedById = new Map(stored.map((ticket) => [ticket.ticketId, ticket]));
-  const validIds = new Set(assigneeIds);
-
-  return defaults.map((ticket) => {
-    const saved = storedById.get(ticket.ticketId);
-    return {
-      ...ticket,
-      status: saved?.status ?? ticket.status,
-      assigneeId:
-        saved?.assigneeId && validIds.has(saved.assigneeId)
-          ? saved.assigneeId
-          : ticket.assigneeId,
-    };
-  });
-};
 
 const normalize = (value: string) => value.toLowerCase().replace(/\s+/g, " ").trim();
 const MIN_POLICY_SCORE = 20;

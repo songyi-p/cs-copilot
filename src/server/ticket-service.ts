@@ -181,9 +181,16 @@ export async function listTickets(agent: CurrentAgent): Promise<TicketListData> 
     },
   });
 
+  const customers = new Map(
+    records.map((record) => [
+      record.customer.customerId,
+      toCustomer(record.customer),
+    ])
+  );
+
   return {
     tickets: records.map(toTicket),
-    customers: records.map((record) => toCustomer(record.customer)),
+    customers: [...customers.values()],
   };
 }
 
