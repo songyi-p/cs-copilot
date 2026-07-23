@@ -66,11 +66,11 @@ export const buildAiReq = (
 });
 
 export const getAiSuggestion = async (
-  req: AiReq,
+  ticketId: string,
   signal?: AbortSignal
 ): Promise<AiSuggestion> => {
   try {
-    const res = await apiClient.post<unknown>("/api/ai-suggestion", req, { signal });
+    const res = await apiClient.post<unknown>("/api/ai-suggestion", { ticketId }, { signal });
     return aiSuggestionSchema.parse(res.data);
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {

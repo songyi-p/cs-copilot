@@ -2,18 +2,20 @@ import { NextResponse } from "next/server";
 import {
   getAiDiagnostics,
   getAiErrorStatus,
-  parseAiReq,
   requestAiSuggestion,
 } from "@/server/ai-suggestion";
 import { requireCurrentAgent } from "@/server/current-agent";
 import { ServerError } from "@/server/errors";
+import { buildAiRequest } from "@/server/ai-request";
+import { z } from "zod";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
+  let agent;
   try {
-    await requireCurrentAgent();
+    agent = await requireCurrentAgent();
   } catch (error) {
     const message =
       error instanceof ServerError ? error.message : "로그인이 필요합니다.";
@@ -28,14 +30,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "요청 본문이 올바른 JSON이 아닙니다." }, { status: 400 });
   }
 
-  let input;
+  let ticketId: string;
   try {
-    input = parseAiReq(body);
+    ticketId = z.object({ ticketId: z.string().min(1).max(100) }).strict().parse(body).ticketId;
   } catch {
-    return NextResponse.json({ error: "AI 제안 요청 데이터가 올바르지 않습니다." }, { status: 400 });
+    return NextResponse.json({ error: "티켓 식별자가 올바르지 않습니다." }, { status: 400 });
   }
 
   try {
+    const input = await buildAiRequest(ticketId, agent);
     const suggestion = await requestAiSuggestion(input);
     return NextResponse.json(suggestion);
   } catch (error) {

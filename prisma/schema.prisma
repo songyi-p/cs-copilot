@@ -239,3 +239,28 @@ model TicketPolicyReference {
   @@index([ticketId])
   @@index([policyId, section])
 }
+
+model Policy {
+  policyId    String          @id
+  title       String
+  category    String
+  sourcePath  String          @unique
+  sections    PolicySection[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model PolicySection {
+  sectionId        String   @id
+  policyId         String
+  section          String
+  content          String   @db.Text
+  keywords         String[]
+  ticketCategories String[]
+  orderStatuses    String[]
+  policy           Policy   @relation(fields: [policyId], references: [policyId], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([policyId])
+}

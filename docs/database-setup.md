@@ -109,7 +109,9 @@ User user-demo-yoon
 
 ## 정책 데이터
 
-정책 Markdown과 `policy-search-index.json`은 현재 Git이 원본이다. 정책을 운영 화면에서 편집하거나
-버전 승인·즉시 배포가 필요해지는 시점에 `Policy`와 `PolicyVersion`을 DB 원본으로 전환한다.
-그 전에는 정책 검색 projection까지 DB로 옮기지 않아도 업무 데이터의 영속성과 상담사 간 동기화
-목표를 달성할 수 있다.
+정책 Markdown은 Git에서 관리하며 `npm run db:sync-policies`가 이를 `Policy`, `PolicySection`으로
+DB에 동기화합니다. 현재 점수 기반 검색은 서버가 DB의 정책 섹션을 대상으로 수행하고, AI 요청은
+클라이언트가 전달한 정책이 아니라 서버가 현재 티켓에서 직접 검색한 최대 3개 섹션만 사용합니다.
+
+현재는 읽기 최적화된 점수 기반 검색입니다. 정책 수가 커지면 PostgreSQL 전문 검색 인덱스 또는
+임베딩 기반 벡터 검색을 `PolicySection`에 추가하되, AI에 전달하는 허용 필드는 계속 정책 ID·섹션·본문으로 제한합니다.

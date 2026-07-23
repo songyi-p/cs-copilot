@@ -12,6 +12,7 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
+    "db:sync-policies": "tsx scripts/sync-policies.ts",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate"
   },
