@@ -1,7 +1,7 @@
 "use server";
 
 import { AuthError } from "next-auth";
-import { signIn, signOut } from "@/auth";
+import { signIn, signOut } from "@/utils/auth";
 
 export type DemoLoginState = {
   error: string;

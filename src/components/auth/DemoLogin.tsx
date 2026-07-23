@@ -13,7 +13,7 @@ export function DemoLogin() {
 
   return (
     <main className="grid min-h-dvh place-items-center bg-canvas px-5 py-10">
-      <section className="w-full max-w-112 rounded-2xl border border-line bg-white p-8 shadow-[0_24px_70px_#23304a14] max-mobile:p-6">
+      <section className="w-full max-w-md rounded-2xl border border-line bg-white p-8 shadow-[0_24px_70px_#23304a14] max-mobile:p-6">
         <div className="mb-8">
           <div className="mb-5 flex items-center gap-2.5 text-base font-extrabold text-navy">
             <span className="text-xl text-[#826ee0]">✦</span>

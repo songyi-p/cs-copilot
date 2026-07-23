@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { auth } from "@/utils/auth";
 import { DemoLogin } from "@/components/auth/DemoLogin";
 import { Dashboard } from "@/components/dashboard/Dashboard";
 

@@ -3,7 +3,6 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma, requireDatabaseConfig } from "@/server/prisma";
 
-const DEMO_AGENT_ID = "agent-yoon";
 const isAgentRole = (value: unknown): value is "AGENT" | "ADMIN" =>
   value === "AGENT" || value === "ADMIN";
 
@@ -20,12 +19,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Credentials({
       id: "demo",
       name: "CS Copilot 데모",
-      credentials: {},
-      authorize: async () => {
+      credentials: { agentId: {} },
+      authorize: async (credentials) => {
         requireDatabaseConfig();
+        const agentId = typeof credentials?.agentId === "string" ? credentials.agentId : "";
+        if (!agentId) return null;
         const agent = await prisma.agent.findUnique({
           where: {
-            agentId: DEMO_AGENT_ID,
+            agentId,
             isActive: true,
           },
           include: {

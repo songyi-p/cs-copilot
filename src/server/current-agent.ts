@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { auth } from "@/utils/auth";
 import { prisma, requireDatabaseConfig } from "@/server/prisma";
 import { ServerError } from "@/server/errors";
 
