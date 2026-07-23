@@ -5,11 +5,22 @@ import {
   parseAiReq,
   requestAiSuggestion,
 } from "@/server/ai-suggestion";
+import { requireCurrentAgent } from "@/server/current-agent";
+import { ServerError } from "@/server/errors";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
+  try {
+    await requireCurrentAgent();
+  } catch (error) {
+    const message =
+      error instanceof ServerError ? error.message : "로그인이 필요합니다.";
+    const status = error instanceof ServerError ? error.status : 401;
+    return NextResponse.json({ error: message }, { status });
+  }
+
   let body: unknown;
   try {
     body = await request.json();

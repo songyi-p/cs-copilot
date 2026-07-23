@@ -5,10 +5,14 @@ export type {
   AiReq,
   AiScore,
   AiSuggestion,
+  ApproveTicketInput,
   OrderContext,
   OrderFacts,
   PolicyContext,
   PolicyRef,
+  SaveDraftInput,
+  SavedSuggestion,
+  TransferTicketInput,
 } from "@/utils/schemas";
 
 export type Ticket = {
@@ -82,4 +86,22 @@ export type ActionHistory = {
   toAgentId?: string;
   aiConfidenceScore?: AiScore;
   policyReferences?: PolicyRef[];
+};
+
+export type TicketListData = {
+  tickets: Ticket[];
+  customers: Customer[];
+};
+
+export type TicketDetailData = {
+  ticket: Ticket;
+  customer: Customer;
+  order?: Order;
+  assignee: Agent;
+  histories: ActionHistory[];
+  draft: string;
+};
+
+export type MutationResult = {
+  message: string;
 };

@@ -132,6 +132,38 @@ export const aiReqSchema = z
   })
   .strict();
 
+const savedSuggestionSchema = z
+  .object({
+    replyDraft: z.string().trim().min(1).max(MAX_REPLY_LEN),
+    recommendedAction: aiActionSchema,
+    confidenceScore: aiScoreSchema,
+    policyReferences: z.array(policyRefSchema).max(MAX_POLICY_REFS),
+  })
+  .strict();
+
+export const saveDraftSchema = z
+  .object({
+    draft: z.string().trim().min(1).max(MAX_REPLY_LEN),
+    suggestion: savedSuggestionSchema.optional(),
+  })
+  .strict();
+
+export const approveTicketSchema = z
+  .object({
+    finalResponse: z.string().trim().min(1).max(MAX_REPLY_LEN),
+    suggestion: savedSuggestionSchema,
+  })
+  .strict();
+
+export const transferTicketSchema = z
+  .object({
+    toAgentId: z.string().trim().min(1).max(100),
+    note: z.string().trim().max(1_000),
+    draft: z.string().trim().max(MAX_REPLY_LEN),
+    suggestion: savedSuggestionSchema.optional(),
+  })
+  .strict();
+
 export type AiAction = z.infer<typeof aiActionSchema>;
 export type AiScore = z.infer<typeof aiScoreSchema>;
 export type PolicyRef = z.infer<typeof policyRefSchema>;
@@ -141,3 +173,7 @@ export type OrderContext = z.infer<typeof orderContextSchema>;
 export type OrderFacts = z.infer<typeof orderFactsSchema>;
 export type PolicyContext = z.infer<typeof policyContextSchema>;
 export type AiReq = z.infer<typeof aiReqSchema>;
+export type SavedSuggestion = z.infer<typeof savedSuggestionSchema>;
+export type SaveDraftInput = z.infer<typeof saveDraftSchema>;
+export type ApproveTicketInput = z.infer<typeof approveTicketSchema>;
+export type TransferTicketInput = z.infer<typeof transferTicketSchema>;
