@@ -1,0 +1,241 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AgentRole {
+  AGENT
+  ADMIN
+}
+
+enum CustomerGrade {
+  BRONZE
+  SILVER
+  GOLD
+  VIP
+}
+
+enum OrderStatus {
+  PAID
+  PREPARING
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum TicketCategory {
+  DELIVERY_DELAY
+  EXCHANGE
+  RETURN
+  DELIVERY_ADDRESS
+  ORDER_CHANGE
+  REFUND_STATUS
+  RETURN_FEE
+  DEFECT
+  CANCELLATION
+  MEMBERSHIP
+  WRONG_ITEM
+  DELIVERY_MISSING
+}
+
+enum TicketStatus {
+  OPEN
+  IN_REVIEW
+  ESCALATED
+  RESOLVED
+}
+
+enum AiDecision {
+  ADOPTED
+  EDITED
+  REJECTED
+}
+
+enum HistoryEventType {
+  DRAFT_SAVED
+  ESCALATED
+  RESPONSE_APPROVED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  agent         Agent?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Agent {
+  agentId           String          @id
+  userId            String?         @unique
+  name              String
+  role              AgentRole       @default(AGENT)
+  isActive          Boolean         @default(true)
+  user              User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  assignedTickets   Ticket[]        @relation("TicketAssignee")
+  drafts            TicketDraft[]   @relation("DraftAuthor")
+  histories         ActionHistory[] @relation("HistoryActor")
+  sentTransfers     ActionHistory[] @relation("TransferFrom")
+  receivedTransfers ActionHistory[] @relation("TransferTo")
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([role, isActive])
+}
+
+model Customer {
+  customerId       String        @id
+  name             String
+  grade            CustomerGrade
+  recentOrderCount Int           @default(0)
+  recentCsCount    Int           @default(0)
+  orders           Order[]
+  tickets          Ticket[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([grade])
+}
+
+model Order {
+  orderId            String      @id
+  customerId         String
+  productName        String
+  orderStatus        OrderStatus
+  orderedAt          DateTime    @db.Date
+  deliveryExpectedAt DateTime?   @db.Date
+  deliveredAt        DateTime?   @db.Date
+  paymentAmount      Int
+  customer           Customer    @relation(fields: [customerId], references: [customerId], onDelete: Restrict)
+  tickets            Ticket[]
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  @@index([customerId, orderedAt(sort: Desc)])
+  @@index([orderStatus])
+}
+
+model Ticket {
+  ticketId         String                  @id
+  customerId       String
+  orderId          String?
+  assigneeId       String
+  title            String
+  inquiry          String                  @db.Text
+  category         TicketCategory
+  status           TicketStatus
+  version          Int                     @default(1)
+  customer         Customer                @relation(fields: [customerId], references: [customerId], onDelete: Restrict)
+  order            Order?                  @relation(fields: [orderId], references: [orderId], onDelete: SetNull)
+  assignee         Agent                   @relation("TicketAssignee", fields: [assigneeId], references: [agentId], onDelete: Restrict)
+  draft            TicketDraft?
+  histories        ActionHistory[]
+  policyReferences TicketPolicyReference[]
+  createdAt        DateTime
+  updatedAt        DateTime                @updatedAt
+
+  @@index([assigneeId, status, createdAt(sort: Desc)])
+  @@index([customerId, createdAt(sort: Desc)])
+  @@index([orderId])
+  @@index([category, status])
+}
+
+model TicketDraft {
+  ticketId  String   @id
+  content   String   @db.Text
+  savedById String
+  ticket    Ticket   @relation(fields: [ticketId], references: [ticketId], onDelete: Cascade)
+  savedBy   Agent    @relation("DraftAuthor", fields: [savedById], references: [agentId], onDelete: Restrict)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([savedById, updatedAt(sort: Desc)])
+}
+
+model ActionHistory {
+  historyId         String            @id @default(cuid())
+  ticketId          String
+  suggestedAction   String
+  finalAction       String
+  aiDecision        AiDecision?
+  agentId           String
+  finalResponse     String?           @db.Text
+  actionLabel       String?
+  eventType         HistoryEventType?
+  note              String?           @db.Text
+  fromAgentId       String?
+  toAgentId         String?
+  aiConfidenceScore Int?
+  policyReferences  Json?             @db.JsonB
+  ticket            Ticket            @relation(fields: [ticketId], references: [ticketId], onDelete: Cascade)
+  agent             Agent             @relation("HistoryActor", fields: [agentId], references: [agentId], onDelete: Restrict)
+  fromAgent         Agent?            @relation("TransferFrom", fields: [fromAgentId], references: [agentId], onDelete: SetNull)
+  toAgent           Agent?            @relation("TransferTo", fields: [toAgentId], references: [agentId], onDelete: SetNull)
+  createdAt         DateTime          @default(now())
+
+  @@index([ticketId, createdAt(sort: Desc)])
+  @@index([agentId, createdAt(sort: Desc)])
+  @@index([eventType, createdAt(sort: Desc)])
+  @@index([fromAgentId])
+  @@index([toAgentId])
+}
+
+model TicketPolicyReference {
+  referenceId String   @id
+  ticketId    String
+  policyId    String
+  section     String
+  reason      String
+  ticket      Ticket   @relation(fields: [ticketId], references: [ticketId], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@index([ticketId])
+  @@index([policyId, section])
+}
