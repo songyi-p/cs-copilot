@@ -19,11 +19,12 @@
 
 ## 핵심 경험
 
-1. 20개의 실무형 문의 중 처리할 티켓을 선택합니다.
-2. 고객 문의와 주문·배송 정보를 한 화면에서 확인합니다.
-3. 문의 분류, 주문 상태, 키워드를 기준으로 관련 정책 섹션을 최대 3개 검색합니다.
-4. AI가 답변 초안, 권장 처리안, 정책 근거, 신뢰도와 추가 확인 정보를 제안합니다.
-5. 담당자가 내용을 수정해 승인하거나 임시 저장·이관하고, 결과를 처리 이력으로 남깁니다.
+1. 미리 준비된 윤서연 상담사 데모 계정으로 로그인합니다.
+2. 해당 상담사에게 배정된 실무형 문의 중 처리할 티켓을 선택합니다.
+3. 고객 문의와 주문·배송 정보를 한 화면에서 확인합니다.
+4. 문의 분류, 주문 상태, 키워드를 기준으로 관련 정책 섹션을 최대 3개 검색합니다.
+5. AI가 답변 초안, 권장 처리안, 정책 근거, 신뢰도와 추가 확인 정보를 제안합니다.
+6. 담당자가 내용을 수정해 승인하거나 임시 저장·이관하고, 결과를 DB 처리 이력으로 남깁니다.
 
 ## 이 프로젝트의 강점
 
@@ -48,19 +49,20 @@ LLM에는 고객 문의, 식별자를 제외한 관련 주문 정보, 검색된 
 ### 제안 이후의 업무 흐름까지 연결했습니다
 
 답변 생성에서 끝나지 않고 담당자 권한, 초안 수정과 저장, 승인 확인, 담당자 이관, 처리 이력까지
-한 흐름으로 구현했습니다. 데모 상태는 `localStorage`에 보존되어 새로고침 후에도 이어서 확인할 수
-있습니다.
+한 흐름으로 구현했습니다. 고객·주문·티켓·초안과 처리 이력은 PostgreSQL에 저장되며, Auth.js
+세션의 상담사 ID를 기준으로 배정된 티켓만 조회합니다.
 
 ## 동작 구조
 
 ```mermaid
 flowchart LR
-    A["고객 문의 · 주문"] --> B["정책 검색 Top 3"]
-    B --> C["서버 전용 AI API"]
-    C --> D["OpenAI Structured Outputs"]
-    D --> E["Zod · 업무 규칙 검증"]
-    E --> F["답변 · 근거 · 신뢰도"]
+    A["Auth.js 데모 로그인"] --> B["배정 티켓 · 주문 조회"]
+    B --> C["정책 검색 Top 3"]
+    C --> D["서버 전용 AI API"]
+    D --> E["OpenAI Structured Outputs"]
+    E --> F["Zod · 업무 규칙 검증"]
     F --> G["담당자 수정 · 승인 · 이관"]
+    G --> H["PostgreSQL 이력 저장"]
 ```
 
 ## 주요 기여
@@ -70,7 +72,9 @@ flowchart LR
 - 카테고리·주문 상태·키워드 가중치를 활용한 정책 섹션 검색과 근거 노출 구현
 - OpenAI SDK, Structured Outputs, Zod를 사용한 서버 전용 LLM 파이프라인 구축
 - 정책 근거 검증, 신뢰도 보정, 담당자 이관 등 AI 안전장치 설계
-- 임시 저장, 승인, 담당자 권한·이관, 처리 이력과 `localStorage` 복원 흐름 구현
+- Auth.js 데모 세션, 상담사 권한과 배정 티켓 조회 구현
+- PostgreSQL·Prisma 기반 초안, 승인, 담당자 이관과 처리 이력 저장 구현
+- 승인·이관 트랜잭션 및 동시 수정 충돌 검사 구현
 - 20개 실무형 평가 사례와 자동 테스트를 통한 정책 검색 및 데이터 허용 목록 검증
 - Vercel 배포, Preview 보호와 AI API Rate Limiting을 포함한 공개 데모 운영 구성
 
@@ -81,6 +85,9 @@ flowchart LR
 | Web | Next.js 16, React 19, TypeScript |
 | UI | Tailwind CSS 4 |
 | Server State | TanStack Query, Axios |
+| Database | PostgreSQL |
+| ORM | Prisma |
+| Auth | Auth.js |
 | AI | OpenAI Responses API, Structured Outputs |
 | Validation | Zod |
 | Deployment | Vercel |
@@ -92,16 +99,32 @@ npm install
 cp .env.example .env.local
 ```
 
-`.env.local`에 서버 전용 API 키를 설정합니다. `OPENAI_MODEL`은 선택 사항입니다.
+`.env.local`에 PostgreSQL 연결 정보, Auth.js secret과 서버 전용 API 키를 설정합니다.
+`DATABASE_URL`에는 애플리케이션 트래픽용 pooled URL을, `DIRECT_URL`에는 migration용 direct URL을
+사용합니다. `OPENAI_MODEL`은 선택 사항입니다.
 
 ```dotenv
+DATABASE_URL=
+DIRECT_URL=
+AUTH_SECRET=
+AUTH_TRUST_HOST=true
 OPENAI_API_KEY=your_api_key
 OPENAI_MODEL=gpt-5.4-nano
+```
+
+처음 구성한 DB에는 migration과 초기 데이터를 적용합니다.
+
+```bash
+npm run db:migrate:deploy
+npm run db:seed
 ```
 
 ```bash
 npm run dev
 ```
+
+자세한 Neon·Vercel 연결 및 운영 절차는
+[`docs/database-setup.md`](docs/database-setup.md)를 참고하세요.
 
 ## 검증
 
@@ -112,11 +135,12 @@ npm run build
 ```
 
 자동 테스트는 정책 검색 상위 3개 재현율, 주문 날짜 파생값, LLM 전달 데이터 허용 목록, 응답 근거와
-신뢰도 보정 규칙, 저장 상태 복원을 확인합니다. 상세한 도메인 구조는
+신뢰도 보정 규칙, 상담사 권한 및 저장 요청 계약을 확인합니다. 상세한 도메인 구조는
 [`docs/data-model.md`](docs/data-model.md)에서 볼 수 있습니다.
 
 ## 현재 범위
 
-이 프로젝트는 제품 흐름을 검증하기 위한 데모입니다. 정적 데이터와 브라우저 `localStorage`를
-사용하며 실제 고객 메시지 발송, 결제·환불 실행, 사용자 인증과 상담사 간 데이터 동기화는 포함하지
-않습니다. 모든 AI 처리안은 제안이며 실제 실행 전에 담당자의 확인 또는 승인이 필요합니다.
+이 프로젝트는 제품 흐름을 검증하기 위한 데모입니다. 로그인은 자유 회원가입이 아닌 seed된 윤서연
+상담사 계정으로만 시작합니다. 정책 원본과 검색 인덱스는 아직 Git의 Markdown·JSON으로 관리하며,
+실제 고객 메시지 발송과 결제·환불 실행은 포함하지 않습니다. 모든 AI 처리안은 제안이며 실제 실행
+전에 담당자의 확인 또는 승인이 필요합니다.
