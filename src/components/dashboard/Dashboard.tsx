@@ -8,13 +8,14 @@ import { InactiveAiAssistant } from "@/components/dashboard/ai-section/InactiveA
 import { TicketDetail } from "@/components/dashboard/ticket-section/TicketDetail";
 import { TicketList } from "@/components/dashboard/ticket-section/TicketList";
 import { useDashboard } from "@/hooks/useDashboard";
+import type { Agent } from "@/utils/types";
 
-export function Dashboard() {
+export function Dashboard({ currentAgent }: { currentAgent: Agent }) {
   const desk = useDashboard();
 
   return (
     <main className="h-dvh overflow-hidden select-none max-mobile:h-auto max-mobile:min-h-dvh max-mobile:overflow-visible">
-      <AppHeader />
+      <AppHeader agent={currentAgent} />
       <section className="grid h-[calc(100dvh-136px)] grid-cols-[310px_minmax(430px,1fr)_390px] overflow-hidden max-dashboard:grid-cols-[270px_1fr] max-mobile:block max-mobile:h-auto max-mobile:overflow-visible">
         <TicketList
           tickets={desk.tickets}
